@@ -1,0 +1,127 @@
+import java.sql.*;
+
+class DataBaseConn
+{
+	Connection con;
+	Statement st;
+	String url = "jdbc:oracle:thin:@localhost:1521:JAVA";
+	DataBaseConn(){
+		try{
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			con = DriverManager.getConnection(url , "scott" , "tiger");
+			st = con.createStatement();
+			String createTable = "create table UserMember(Userid varchar2(20) primary key , UserName varchar2(30) not null ,  UserAge number(3) not null , UserSex varchar2(10) constraint User_ck check(UserSex in('남자','여자')) , passward varchar2(50) not null)";
+			st.execute(createTable);
+			pln("테이블 생성 하였습니다.");
+		}catch(ClassNotFoundException cn){
+			pln("클래스를 찾을 수 없습니다.");
+		}catch(SQLException se){
+			pln("데이터 베이스 오류" +se);
+		}
+		new DBUser(this);
+	}
+
+	void pln(String str){
+		System.out.println(str);
+	}
+
+	void p(String str){
+		System.out.print(str);
+	}
+	public static void main(String[] args) 
+	{
+		DataBaseConn b = new DataBaseConn();
+	}
+}
+
+
+class DBUser
+{	
+	Connection con;
+	Statement st;
+	String url = "jdbc:oracle:thin:@localhost:1521:JAVA";
+	DataBaseConn b;
+	
+	DBUser(DataBaseConn b){
+		this.b = b;
+	try{
+		Class.forName("oracle.jdbc.driver.OracleDriver");
+		con = DriverManager.getConnection(url , "scott" , "tiger");
+		st = con.createStatement();
+	}catch(ClassNotFoundException cn){
+	}catch(SQLException se){
+	}
+	}
+
+	String LoginCheck(String id , String pass){  // 회원 로그인 확인하기 
+		String id_ = "";
+		String pass_ = "";
+		String ids = "";
+		ResultSet rs;
+		String SQL = "select Userid ,  passward from where Userid ='"+id+"' and pass = '"+pass+"'";
+		boolean flags = false;
+		try{
+			 rs = st.executeQuery(SQL);
+			 while(rs.next()){
+				id_ = rs.getString("Userid");
+				pass_ = rs.getString("passward");
+				if(id.equalsIgnoreCase(id_) && pass.equalsIgnoreCase(pass_)){
+					flags = true;
+					if(flags){
+						ids = id_;
+					}
+				}else{
+					b.pln("로그인 실패");
+				}
+			 }
+
+		}catch(SQLException se){
+			b.pln("로그인 실패"+se );
+		}
+		return ids;
+	}
+
+	
+    //UserMember(Userid varchar2(20) primary key , UserName varchar2(30) not null ,  UserAge number(3) not null , UserSex varchar2(10) constraint User_ck check(UserSex in('남자','여자')) , passward varchar2(50))";
+	boolean Acceptt(String Userid_ , String UserName_ ,int UserAge_ , String UserSex_ , String passward_ ){
+			boolean bobo = false;
+			String SQL = "insert into UserMember values ( '"+Userid_+"' , '"+UserName_+"' , "+UserAge_+", '"+UserSex_+"' , '"+passward_+"' )";
+			try{
+				st.executeUpdate(SQL);
+				bobo = true;
+				b.pln("회원가입 성공하였습니다.");
+			}catch(SQLException se){
+				bobo = false;
+			}
+		return bobo;
+	}
+
+	String Info(String Userid_ , String passward_){
+		ResultSet rs;
+		String SQL = "select * from UserMember where Userid = '"+Userid_+"' and passward = '"+passward_+"'";
+		String Useride = "";
+		String UserNamee = "";
+		int UserAgee = 0;
+		String UserSexe = "";
+		String passwarde = "";
+		String showInfo = "";
+		try{
+			rs = st.executeQuery(SQL);
+			while(rs.next()){
+				Useride = rs.getString("Userid");
+				UserNamee = rs.getString("UserName");
+				UserAgee = rs.getInt("UserAge");
+				UserSexe = rs.getString("UserSex");
+				passwarde = rs.getString("passward");
+				if(Useride.equalsIgnoreCase(Userid_) && passwarde.equalsIgnoreCase(passward_)){
+					showInfo = "아이디 : "+Useride+" 이름 : " +UserNamee+" 나이 : "+UserAgee+" 성별 : "+UserSexe;
+					b.pln(showInfo);
+				}
+			}
+		}catch(SQLException se){
+		}return showInfo;
+	}
+
+
+
+}
