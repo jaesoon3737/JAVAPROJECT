@@ -1,0 +1,122 @@
+import jakarta.servlet.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.DriverManager;
+import java.sql.Connection;
+import java.util.Vector;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Map;
+
+//import javax.servlet.ServletException;
+//import javax.servlet.annotation.WebServlet;
+//import javax.servlet.http.*;
+
+
+
+
+
+public class HServlet extends HttpServlet
+{
+	public void service(HttpServletRequest req, HttpServletResponse res)
+		throws ServletException, IOException {
+		res.setContentType("text/html;charset=utf-8");  //"text/plain;charset=utf-8"
+		PrintWriter pw = res.getWriter();
+		ResultSet rs;
+		Connection con = null;
+		Statement st = null;
+		String url = "jdbc:oracle:thin:@localhost:1521:JAVA";
+		String DbId = "scott";
+		String DbPassward = "tiger";
+		PreparedStatement ptst = null;
+
+		try{
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+		}catch(ClassNotFoundException cn){
+			System.out.println("클래스를 찾을 수 없습니다.");
+		}
+		try{
+			con = DriverManager.getConnection(url , DbId , DbPassward);
+			st = con.createStatement();
+		}catch(SQLException se){
+			System.out.println("DB 연동 실패 : " + se);
+		}
+		
+		String CreSQL = "create table Members ( id varchar2(40) primary key , passward varchar2(30) , name varchar2(20))";
+		try{
+			st.execute(CreSQL);
+		}catch(SQLException se1){
+			System.out.println("회원 가입 테이블 생성 실패" + se1);
+		}
+		
+		String CretSQL = "create table Borders ( eriCount number(5) primary key , id varchar2(40) , passward varchar2(30) , name varchar2(20) , title varchar2(50) , borderdate date , contents varchar2(1000))";
+		try{
+			st.execute(CretSQL);
+		}catch(SQLException se2){
+			System.out.println("게시판 테이블 생성 실패" + se2);
+		}	
+		String eriCount = req.getParameter("eriCount").trim();
+		String id = req.getParameter("id").trim();
+		String passward = req.getParameter("passward").trim();
+		String name = req.getParameter("name").trim();
+		String title = req.getParameter("title").trim();
+		String contents = req.getParameter("contents").trim();
+		String SYSDATE = "SYSDATE";
+		String inseSQL = "insert into CretSQL values ( ? , '?', '?', '?', ?, '?' )";
+		try{
+			ptst = con.prepareStatement(inseSQL);
+			ptst.setString(1, eriCount);
+			ptst.setString(2, id);
+			ptst.setString(3, passward);
+			ptst.setString(4, name);
+			ptst.setString(5, title);
+			ptst.setString(6, SYSDATE);
+			ptst.setString(7, contents);
+
+			ptst.executeUpdate();
+		}catch(SQLException se3){
+			System.out.println("계시판 글쓰기 저장실패" + se3);
+		}
+		try{
+			String selecSQL = "select eriCount, id ,name ,title ,borderdate , contents from Borders ORDER BY eriCount DESC";
+			rs = st.executeQuery(selecSQL);
+			ArrayList<Map<String,Object>> rsMetas = new ArrayList<Map<String,Object>>();
+			while(rs.next()){
+				Map<String,Object> rsMeta = new HashMap<String,Object>();
+				rsMeta.put("eriCount" , rs.getInt("eriCount"));
+				rsMeta.put("id" , rs.getString("id"));
+				rsMeta.put("name" , rs.getString("name"));
+				rsMeta.put("title" , rs.getString("title"));
+				rsMeta.put("borderdate" , rs.getString("borderdate"));
+				rsMeta.put("contents", rs.getString("contents"));
+				
+				rsMetas.add(rsMeta);
+			}
+
+		String html = "";
+		
+		html += "<h1>수다</h1>";
+		for(Map<String,Object> ts : rsMetas){
+			html += "<div>";
+			html += "<div 게시물 번호 : >" + ts.get("eriCount") + "</div>";
+			html += "<div 아이디 : >" + ts.get("id") + "</div>";
+			html += "<div 닉네임 : >" + ts.get("name") + "</div>";
+			html += "<div 제목 : >" + ts.get("title") + "</div>";
+			html += "<div 작성일 : >" + ts.get("borderdate") + "</div>";
+			html += "<div 내용 : >" + ts.get("contents") + "</div>";
+		}
+		
+		res.getWriter().append(html);
+		}catch(SQLException se4){
+			System.out.println("셀렉문 계시판 글쓰기 저장실패" + se4);
+		}
+	
+	}
+
+}  
+
+
