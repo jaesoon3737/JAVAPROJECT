@@ -1,0 +1,79 @@
+package soo.sv.addr;
+
+import jakarta.servlet.http.*;
+import jakarta.servlet.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.DriverManager;
+import java.sql.Connection;
+import java.util.Vector;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Map;
+import java.sql.Date;
+
+public class loginServletList extends HttpServlet {
+	Connection con;
+	Statement st;
+	static String ids;
+	public void init(){ //DB연결 
+		String url = "jdbc:oracle:thin:@127.0.0.1:1521:JAVA";
+		String usr = "servlet";
+		String pwd = "java";
+		
+		try{
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			con = DriverManager.getConnection(url, usr, pwd);
+			st = con.createStatement();
+		}catch(ClassNotFoundException cnfe){
+			System.out.println("#Oracle driver loading failed");
+		}catch(SQLException se){}
+	}
+
+
+	public void service(HttpServletRequest req, HttpServletResponse res)
+		throws ServletException, IOException { //SQL문수행 -> list.html 
+		res.setContentType("text/html;charset=utf-8"); 
+		PrintWriter pw = res.getWriter();
+        ResultSet rs = null;
+			pw.println("<script>");
+		try{
+			String selecSQL = "select  id , passward from Members";
+			rs = st.executeQuery(selecSQL);
+			while(rs.next()){
+				ids =  rs.getString("id");
+                String passwards = rs.getString("passward");
+				String passwardreq = req.getParameter("passward").trim();
+				String idreq = req.getParameter("id").trim();
+				if(ids.equalsIgnoreCase(idreq) && passwards.equalsIgnoreCase(passwardreq)){
+					    pw.println("location.href='list.do'");
+						break;
+				}else{
+				if(passwards.equalsIgnoreCase(passwardreq)){ 
+						pw.println("alert('아이디 확인해주세요')");
+						pw.println("location.href='../'");
+				}else if(ids.equalsIgnoreCase(idreq)){
+						pw.println("alert('비밀번호 확인해주세요')");
+						pw.println("location.href='../'");
+				}pw.println("location.href='../'");
+				}
+			}
+				pw.println("</script>");
+		}catch(SQLException se4){
+			System.out.println("셀렉문 계시판 글쓰기 저장실패" + se4);
+			pw.println("location.href='../'");
+		}
+		pw.println("</center>");
+	}
+	public void destroy(){ //DB연결해제 
+        try{
+			if(st != null) st.close();
+			if(con != null) con.close();
+		}catch(SQLException se){}
+	}
+}
+
