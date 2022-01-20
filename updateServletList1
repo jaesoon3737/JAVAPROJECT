@@ -1,0 +1,84 @@
+package soo.sv.addr;
+
+import jakarta.servlet.http.*;
+import jakarta.servlet.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.DriverManager;
+import java.sql.Connection;
+import java.util.Vector;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Map;
+import java.sql.Date;
+//if(idu.equalsIgnoreCase(loginServletList.ids)){
+public class updateServletList1 extends HttpServlet {
+	Connection con;
+	Statement st;
+	ResultSet rs;
+	String idu;
+	public void init(){ //DB연결 
+		String url = "jdbc:oracle:thin:@127.0.0.1:1521:JAVA";
+		String usr = "servlet";
+		String pwd = "java";
+		try{
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			con = DriverManager.getConnection(url, usr, pwd);
+			st = con.createStatement();
+		}catch(ClassNotFoundException cnfe){
+			System.out.println("#Oracle driver loading failed");
+		}catch(SQLException se){}
+
+	}
+	public void service(HttpServletRequest req, HttpServletResponse res)
+		throws ServletException, IOException { //SQL문수행 -> list.html 
+		PrintWriter pw = res.getWriter();
+		int eContss = 0;
+		req.setCharacterEncoding("utf-8");
+		res.setContentType("text/html;charset=utf-8"); 
+		System.out.println("수정  저장실패"+idu+loginServletList.ids);
+		String eContst = req.getParameter("eriCount").trim();
+		String id = req.getParameter("id").trim();
+		String name = req.getParameter("name").trim();
+		String title = req.getParameter("title").trim();
+		String contents = req.getParameter("contents").trim();
+		if(eContst != null){
+			eContss = Integer.parseInt(eContst);
+		}
+		pw.println("<script>");
+		try{
+			String selecSQL1 = "select id from borders where eriCount ="+eContst;
+			rs =st.executeQuery(selecSQL1);
+			while(rs.next()){
+			  idu = rs.getString("id");
+			}
+		}catch(SQLException se5){
+			System.out.println("업데이트 키찾기 실패" + se5);
+		}
+		if(idu.equalsIgnoreCase(loginServletList.ids)){
+		try{
+			String selecSQL = "update borders set name ='"+name+"' , title = '"+title+"' , contents = '"+contents+"' where eriCount ="+eContss+"";
+			st.executeUpdate(selecSQL);
+		}catch(SQLException se4){
+			System.out.println("수정  저장실패" + se4);
+		}
+		pw.println("location.href='list.do'");
+		pw.println("</script>");
+		}else{
+		pw.println("alert('자기꺼만 수정가능합니다')");
+		pw.println("location.href='list.do'");
+		pw.println("</script>");
+		}
+	}
+	public void destroy(){ //DB연결해제 
+        try{
+			if(st != null) st.close();
+			if(con != null) con.close();
+		}catch(SQLException se){}
+	}
+}
+
