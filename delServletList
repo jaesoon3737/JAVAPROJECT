@@ -1,0 +1,72 @@
+
+package soo.sv.addr;
+
+import jakarta.servlet.http.*;
+import jakarta.servlet.*;
+import java.io.*;
+import java.sql.*;
+
+public class delServletList extends HttpServlet {
+	Connection con;
+	PreparedStatement ptmt;
+	String sql = "delete from borders where eriCount = ?";
+	public void init(){ //DB연결 
+		String url = "jdbc:oracle:thin:@127.0.0.1:1521:JAVA";
+		String usr = "servlet";
+		String pwd = "java";
+		
+		try{
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			con = DriverManager.getConnection(url, usr, pwd);
+			ptmt = con.prepareStatement(sql);
+		}catch(ClassNotFoundException cnfe){
+			System.out.println("#Oracle driver loading failed");
+		}catch(SQLException se){
+		
+		}
+	}
+	public void doGet(HttpServletRequest req, HttpServletResponse res)
+		throws ServletException, IOException { 
+		int seqss = 0;
+		req.setCharacterEncoding("utf-8");
+		String SEQs = req.getParameter("eriCount");
+		String Sid = req.getParameter("id");
+		String kk = loginServletList.ids;
+		System.out.println(""+Sid + kk);
+		if(SEQs != null){
+			SEQs = SEQs.trim();
+			seqss = Integer.parseInt(SEQs);
+		}
+		res.setContentType("text/html;charset=utf-8"); 
+		PrintWriter pw = res.getWriter();
+		pw.println("<script>");
+	
+		try{
+			ptmt.setInt(1, seqss);
+		if(Sid.equalsIgnoreCase(loginServletList.ids)){
+			int i = ptmt.executeUpdate();
+			if(i>0){
+				pw.println("alert('입력성공')");
+			}else{
+				pw.println("alert('입력실패')");
+			}
+		}else{
+				pw.println("alert('자기꺼만 지워져요')");
+		}
+		}catch(SQLException se){
+			System.out.println("실패2" + se);
+		}
+
+		//pw.println("<a href='list.do'>리스트</a><br/>");  // 얘는 바로 못가니까
+		pw.println("location.href='list.do'"); // 자바스크립트 로케이션 잡아주면 이리로 바로 돌아감
+		pw.println("</script>");
+
+	}
+	public void destroy(){ //DB연결해제 
+        try{
+			if(ptmt != null) ptmt.close();
+			if(con != null) con.close();
+		}catch(SQLException se){}
+	}
+}
+
