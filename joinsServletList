@@ -1,0 +1,73 @@
+package soo.sv.addr;
+
+import jakarta.servlet.http.*;
+import jakarta.servlet.*;
+import java.io.*;
+import java.sql.*;
+
+public class joinsServletList extends HttpServlet {
+	Connection con;
+	PreparedStatement ptst;
+	Statement st;
+	String inseSQL = "insert into Members values ( ? , ? , ?)";
+	public void init(){ //DB연결 
+		String url = "jdbc:oracle:thin:@127.0.0.1:1521:JAVA";
+		String usr = "servlet";
+		String pwd = "java";
+		try{
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			con = DriverManager.getConnection(url, usr, pwd);
+			ptst = con.prepareStatement(inseSQL);
+			st = con.createStatement();
+		}catch(ClassNotFoundException cnfe){
+			System.out.println("#Oracle driver loading failed");
+		}catch(SQLException se){
+			System.out.println("안" + se);
+		}
+		
+		String CreSQL = "create table members ( id varchar2(40) primary key , passward varchar2(30) , name varchar2(20))";
+		try{
+			st.execute(CreSQL);
+			System.out.println("회원 가입 테이블 생성");
+		}catch(SQLException se1){
+		}
+		
+	}
+	public void doPost(HttpServletRequest req, HttpServletResponse res)
+		throws ServletException, IOException { 
+		req.setCharacterEncoding("utf-8");
+		String id = req.getParameter("id").trim();
+		String passward = req.getParameter("passward").trim();
+		String name = req.getParameter("name").trim();
+		res.setContentType("text/html;charset=utf-8"); 
+		PrintWriter pw = res.getWriter();
+		pw.println("<script>");
+		try{
+			ptst.setString(1, id);
+			ptst.setString(2, passward);
+			ptst.setString(3, name);
+			int i = ptst.executeUpdate();
+			if(i>0){
+				pw.println("alert('회원가입 성공')");
+				pw.println("location.href='/db1'");
+			}else{
+				pw.println("alert('회원가입 실패 동일한 아이디가 존재합니다')");
+				pw.println("location.href='/db1'");
+			}
+		}catch(SQLException se){
+			pw.println("alert('회원가입 실패 동일한 아이디가 존재합니다')");
+			pw.println("location.href='/db1'");
+		}
+		//pw.println("<a href='list.do'>리스트</a><br/>");  // 얘는 바로 못가니까
+		// 자바스크립트 로케이션 잡아주면 이리로 바로 돌아감
+		pw.println("</script>");
+
+	}
+	public void destroy(){ //DB연결해제 
+        try{
+			if(ptst != null) ptst.close();
+			if(con != null) con.close();
+		}catch(SQLException se){}
+	}
+}
+
