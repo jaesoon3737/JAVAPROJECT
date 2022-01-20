@@ -1,0 +1,67 @@
+class Solution {
+    public int[] solution(int[] lottos, int[] win_nums) { 
+        int cc = 0;
+        int c1 = 0;
+        int rr = 0;
+        int rh = 0;
+        for(int k= 0;k<lottos.length;k++){
+                for(int s= 0;s<win_nums.length;s++){
+                    if(lottos[k]==win_nums[s]){
+                    cc++;    }
+                     }  
+                    if(0==lottos[k]){
+                    c1++;  
+                    }
+              } 
+        if(cc==6){
+            rr = 1;
+            rh = 1;
+        }
+        if(c1==6){
+            rh = 1;
+            rr = 6;
+        }
+        if(cc==0 && c1==0){
+            rr = 6;
+            rh = 6;
+        }
+        if(cc==5){
+            rr =2;
+            int b = 2;
+            for(int i= 0;i<=c1;i++){
+                rh = b;
+                b--;
+            }
+        }else if(cc==4){
+            rr =3;
+            int b = 3;
+            for(int i= 0;i<=c1;i++){
+                rh = b;
+                b--;
+            }
+        }else if(cc==3){
+            rr =4;
+            int b = 4;
+            for(int i= 0;i<=c1;i++){
+                rh = b;
+                b--;
+            }
+        }else if(cc==2){
+            rr =5;
+            int b = 5;
+            for(int i= 0;i<=c1;i++){
+                rh = b;
+                b--;
+            }
+        }else if(cc==1){
+            rr =6;
+            int b = 6;
+            for(int i= 0;i<=c1;i++){
+                rh = b;
+                b--;
+            }
+        }
+        int[] answer = { rh , rr };
+        return answer;
+    }
+}
