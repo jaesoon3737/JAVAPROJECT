@@ -1,0 +1,74 @@
+package soo.sv.addr;
+
+import jakarta.servlet.http.*;
+import jakarta.servlet.*;
+import java.io.*;
+import java.sql.*;
+public class inServletList extends HttpServlet {
+	Connection con;
+	PreparedStatement ptst;
+	Statement st;
+	String inseSQL = "insert into borders values ( eriCountSEQ.nextval , ? , ? , ? , SYSDATE , ? )";
+	static String id;
+	public void init(){ //DB연결 
+		String url = "jdbc:oracle:thin:@127.0.0.1:1521:JAVA";
+		String usr = "servlet";
+		String pwd = "java";
+		try{
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			con = DriverManager.getConnection(url, usr, pwd);
+			ptst = con.prepareStatement(inseSQL);
+			st = con.createStatement();
+		}catch(ClassNotFoundException cnfe){
+			System.out.println("#Oracle driver loading failed");
+		}catch(SQLException se){
+			System.out.println("안" + se);
+		}
+		try{
+
+			String SEQss1 = "drop sequence eriCountSEQ";
+			st.execute(SEQss1);
+			String SEQss = "create sequence eriCountSEQ increment by 1 start with 1 nocache";
+			st.execute(SEQss);
+		}catch(SQLException se){
+				System.out.println("오ㅜㅐ안대"+ se);
+		}
+	}
+	public void doPost(HttpServletRequest req, HttpServletResponse res)
+		throws ServletException, IOException { 
+		req.setCharacterEncoding("utf-8");
+		id = loginServletList.ids.trim();
+		String name = req.getParameter("name").trim();
+		String title = req.getParameter("title").trim();
+		String contents = req.getParameter("contents").trim();
+		res.setContentType("text/html;charset=utf-8"); 
+		PrintWriter pw = res.getWriter();
+		pw.println("<script>");
+		try{
+			ptst.setString(1, id);
+			ptst.setString(2, name);
+			ptst.setString(3, title);
+			ptst.setString(4, contents);
+			int i = ptst.executeUpdate();
+				pw.println("alert('인설트됨')");
+			if(i>0){
+				pw.println("alert('입력성공')");
+			}else{
+				pw.println("alert('입력실패')");
+			}
+		}catch(SQLException se){
+			System.out.println("'인설트fff됨'"+se);  
+		}
+		//pw.println("<a href='list.do'>리스트</a><br/>");  // 얘는 바로 못가니까
+		pw.println("location.href='list.do'"); // 자바스크립트 로케이션 잡아주면 이리로 바로 돌아감
+		pw.println("</script>");
+
+	}
+	public void destroy(){ //DB연결해제 
+        try{
+			if(ptst != null) ptst.close();
+			if(con != null) con.close();
+		}catch(SQLException se){}
+	}
+}
+
