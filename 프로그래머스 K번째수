@@ -1,0 +1,37 @@
+import java.util.Vector; 
+class Solution {
+    public int[] solution(int[] array, int[][] commands) { 
+    int k = commands[0][0]; 
+    int s = commands[0][1]; 
+    int e;
+    int as = s-k+1;
+    int []answer = new int[commands.length];
+    Vector<Integer> sd = new Vector<Integer>();
+  for(int i =0;i<commands.length;i++){
+     k = commands[i][0];
+     s = commands[i][1];
+     e = commands[i][2];
+     int e1 = e-1;
+    for(int j=(k-1);j<s;j++){ 
+     sd.add(array[j]);
+    } 
+    int []s1 = new int[sd.size()];   
+    for(int ss=0;ss<sd.size();ss++){ 
+            s1[ss] = sd.get(ss);
+    }
+    for(int h=0; h<s1.length;h++){
+       for(int y=h+1;y<s1.length;y++){
+             if(s1[h]>s1[y]){
+                int temp = s1[h];
+				s1[h] = s1[y];
+				s1[y] = temp;
+             }
+           
+       }
+   }
+     answer[i] = s1[e1];     
+     sd.clear();
+  
+     } return  answer;  
+  }
+}
