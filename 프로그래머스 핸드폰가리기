@@ -1,0 +1,17 @@
+class Solution {
+    public String solution(String phone_number) {
+        String ss = phone_number.substring( phone_number.length()-4 , phone_number.length()); // 뒤에 4자리
+        String sf = phone_number.substring( 0 , phone_number.length()-4);
+        int cc = sf.length();
+        String star = "*";
+    
+        
+        StringBuilder sb = new StringBuilder();
+        for(int i=0;i<sf.length();i++){
+             sb.append(star); 
+        }
+       String ss1 = sb + ss;
+     
+        return ss1;
+    }
+}
