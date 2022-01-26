@@ -1,0 +1,144 @@
+drop table TR_MYHOME;
+drop table TR_LOGIN;
+drop table TR_MEMBER;
+drop sequence TR_MYHOME_SEQ;
+purge recyclebin;
+
+-- ȸ�� 
+create table TR_MEMBER(
+    ID varchar2(10) constraint TR_MEMBER_PK primary key, 
+    PWD varchar2(10) constraint TR_MEMBER_PWD_NN not null, 
+    NAME varchar2(20) constraint TR_MEMBER_NAME_NN not null, 
+    EMAIL varchar2(20) constraint TR_MEMBER_UQ unique, 
+    RDATE date,
+    se varchar2(10) default '��' not null
+);
+-- �α��� 
+create table TR_LOGIN(
+    ID varchar2(10), 
+    PWD varchar2(10), 
+    constraint TR_LOGIN_PK primary key(ID), 
+    constraint TR_LOGIN_FK foreign key(ID) references TR_MEMBER(ID) on delete cascade
+);
+-- Ȩ������ 
+create table TR_MYHOME(
+    SEQ number constraint TR_MYHOME_PK primary key, 
+    ID varchar2(10) constraint TR_MYHOME_ID_NN not null, 
+    HNAME varchar2(20) constraint TR_MYHOME_HNAME_NN not null, 
+    TOTCOUNT number default 0, 
+    HMSG varchar2(15), 
+    CDATE date, 
+    constraint TR_MYHOME_FK foreign key(ID) references TR_MEMBER(ID) on delete cascade
+);
+create sequence TR_MYHOME_SEQ start with 1 increment by 1 nocache;
+
+select TNAME from tab;
+select SEQUENCE_NAME from seq;
+
+create table gift(
+       ID varchar2(10) constraint gift_NN not null, 
+       NAME varchar2(20) constraint gift_NN1 not null, 
+       gifts varchar2(30) default '����',
+       grade varchar2(30)  default '�����' check(grade in( '�����' , '�ǹ�' , '���' , '�÷�' , '���̾�')),
+       constraint gift_FK foreign key(ID) references TR_MEMBER(ID) on delete cascade
+);
+--select TR_MYHOME_SEQ.nextval from DUAL;
+
+
+--Q1) trigger1:ȸ�������� �ϸ� 
+     -- '�α��� ���̺�'�� ID/PWD�Է�, 
+     -- 'Ȩ������ ���̺�'�� �������� ID/HNAME�� �ԷµǴ� Ʈ���� 
+
+--Q2) trigger2:ȸ�����������.. �α� ���̺��� PWD�������Ǵ� Ʈ���� 
+
+ create or replace trigger tigg1
+   after insert on TR_MEMBER for each row
+   begin
+   insert into TR_LOGIN values ( :NEW.ID , :NEW.PWD);
+   insert into TR_MYHOME(SEQ , ID , HNAME) values (TR_MYHOME_SEQ.NEXTVAL, :NEW.ID , :NEW.NAME);
+   insert into gift(ID , NAME) values ( :NEW.ID , :NEW.PWD);
+   end;
+    /
+
+
+ create or replace trigger tigg2
+    after update on TR_MEMBER for each row
+    begin
+    update TR_LOGIN set PWD = :NEW.PWD where ID = :new.ID;
+    end;
+    /
+  
+ create or replace trigger tigg5
+    after update on TR_MEMBER for each row
+    begin
+    update gift set  grade = :NEW.grade where ID = :new.ID;
+    end;
+    /
+ 
+  create or replace trigger tigg3
+  after insert on TR_MEMBER 
+  begin
+  DBMS_OUTPUT.PUT_LINE('���ο� ȸ���� �����Ͽ����ϴ�.');
+  end;
+
+
+  
+  alter table TR_MEMBER modify(se varchar2(10) default '��' check(se in( '��' ,'��')));
+  --alter table TR_MEMBER add (gifts varchar2(40) default '����');
+  --alter table TR_MEMBER add (grade varchar2(40) default '����');
+  alter table TR_MEMBER add (grade varchar2(40) default '����' check(grade in('�����' , '�ǹ�' , '���' ,'�÷�' ,'���̾�')));
+  
+ 
+ 
+ 
+  update TR_MEMBER set PWD = '4984' where NAME='���ȯ';
+
+  select * from TR_LOGIN;
+  select * from TR_MYHOME;
+  ;
+
+
+  create or replace trigger tigg4
+  after update on TR_MEMBER for each row
+  begin 
+	  if :new.grade = '�����'
+	    then 
+	     update gift set gifts = '�縮���̵�' where ID = :new.ID;
+	  end if;
+
+	  if :new.grade = '�ǹ�'
+	    then 
+	     update gift set gifts = '�Ұ��� �Ͱ��� 8000�����̻�' where ID = :new.ID;
+	  end if;
+
+	  if :new.grade = '���'
+	   then 
+	     update gift set gifts = '�߶�' where ID = :new.ID;
+	   end if;
+
+	  if :new.grade = '�÷�'
+	   then 
+	     update gift set gifts = 'Ʈ������' where ID = :new.ID;
+	   end if;
+
+	  if :new.grade = '���̾�'
+	   then 
+	     update gift set gifts = '��������' where ID = :new.ID;
+	  end if;
+
+  end;
+  /
+  --insert into TR_MEMBER values('�̹�' , '8121' , '�ִ���' , 'atsdfas@naver.com' , SYSDATE , '��' );
+ -- alter table TR_MEMBER DROP COLUMN grade;
+  --alter table TR_MEMBER DROP COLUMN gifts;
+  insert into TR_MEMBER values('����' , '4747' , '���ȯ' , 'rlats@naver.com' , SYSDATE , '��' , '�����' );
+  insert into TR_MEMBER values('������' , '8321' , '���翵' , 'asdfas@naver.com' , SYSDATE , '��' ,'�����' );
+  insert into TR_MEMBER values('�ٶ�' , '8121' , '�ִ���' , 'ats@naver.com' , SYSDATE , '��' , '�����' );
+  --update TR_MEMBER set grade = '�ǹ�' where ID = '�̹�'; 	
+  update TR_MEMBER set grade = '�÷�' where ID = '�ٶ�';
+  update TR_MEMBER set grade = '���̾�' where ID = '�ٶ�';
+  update TR_MEMBER set grade = '���̾�' where ID = '����';
+  update TR_MEMBER set grade = '���' where ID = '������';
+  select * from TR_LOGIN;
+  select * from TR_MYHOME;
+  select * from gift;
