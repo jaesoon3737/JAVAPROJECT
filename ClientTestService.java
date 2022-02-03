@@ -1,5 +1,8 @@
 package ClientTestRepository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ClientTest.domain.ClientMembers;
 
 public class ClientTestService {
@@ -23,5 +26,9 @@ public class ClientTestService {
 	
 	public int loginS(ClientMembers dto) {
 		return dao.login(dto); // id 로그인
+	}
+	
+	public ArrayList<ClientMembers> loginSS(String id , String password) {
+		return dao.logins(id , password); // id 로그인
 	}
 }

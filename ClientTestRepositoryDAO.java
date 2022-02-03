@@ -16,6 +16,8 @@ import javax.sql.DataSource;
 import ClientTest.domain.ClientMembers;
 
 
+
+
  class ClientTestRepositoryDAO implements ClientTestRepository {
 	 
 	DataSource ds;
@@ -219,12 +221,12 @@ import ClientTest.domain.ClientMembers;
 		
 	}
 
-	List<ClientMembers> logins(String id ,String password) {
+	ArrayList<ClientMembers> logins(String id ,String password) {
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql = ClientSQL.LOGININFO;
-		List<ClientMembers> list = new ArrayList<>(); 
+		ArrayList<ClientMembers> list = new ArrayList<ClientMembers>(); 
 		if(id != null) {
 			try {
 				con = ds.getConnection();
@@ -239,7 +241,7 @@ import ClientTest.domain.ClientMembers;
 					String email = rs.getString("email");
 					String power = rs.getString("power");
 					if(password.equals(rspassword)) {
-						list.add(new ClientMembers(numbers, rsid, password, rspassword, nickname, nickname, email, power));
+						list.add(new ClientMembers(numbers, rsid, password, nickname, nickname, email, power));
 						return list;
 					}else {
 						return null;
@@ -295,6 +297,7 @@ import ClientTest.domain.ClientMembers;
 			pstmt.setString(3, name);
 			pstmt.setString(4, nickname);
 			pstmt.setString(5, email);
+			System.out.println(""+sql + id + password +":"+ name +":"+ nickname +":"+ email);
 			int i = pstmt.executeUpdate();
 			if(i>0) {
 				return true;
@@ -308,6 +311,8 @@ import ClientTest.domain.ClientMembers;
 		}return false;
 		
 	}
+	
+	
 	
     private void close(Connection con, PreparedStatement pstmt, ResultSet rs)
     {	
@@ -336,3 +341,4 @@ import ClientTest.domain.ClientMembers;
 
 		
 }
+
