@@ -8,8 +8,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 
+import ClientTest.domain.ClientMembers;
 import ClientTestRepository.ClientTestService;
+
 
 
 @WebServlet("/boardk/clientLoginS")
@@ -35,9 +38,12 @@ public class ClientTestController extends HttpServlet {
 				}
 			}
 			case "joinIndex" : joinIndex(request,response); break;
-			default :
-				joinIndex(request,response);
+			case "logins" : loginS(request,response); break;
+			case "logout" : logout(request,response); break;
+			
 			}
+		}else {
+			response.sendRedirect("../ClientTest_mvc");
 		}
 	}
 	
@@ -58,10 +64,10 @@ public class ClientTestController extends HttpServlet {
 		String password = request.getParameter("password");
 		String passwordCheck = request.getParameter("passwordCheck");
 		String name = request.getParameter("name");
-		String nickName = request.getParameter("nickname");
+		String nickName = request.getParameter("nickName");
 		String email = request.getParameter("email");
 		if(id == null || password == null || passwordCheck == null || name == null || nickName == null || email == null || id.equals("") || password.equals("") || passwordCheck.equals("") || name.equals("") || nickName.equals("") || email.equals("") ) {
-			response.sendRedirect("../ClientTest_mvc/joinn.html");
+			response.sendRedirect("../ClientTest_mvc/joinsk.jsp");
 		}else {
 			if(passwordCheck.equals(password)) {
 				boolean flag = service.joinS(id , password , name , nickName , email);
@@ -69,7 +75,7 @@ public class ClientTestController extends HttpServlet {
 				RequestDispatcher rd = request.getRequestDispatcher("../ClientTest_mvc/joinMember.jsp");
 				rd.forward(request, response);		
 			}else {
-				response.sendRedirect("../ClientTest_mvc/joinn.html");
+				response.sendRedirect("../ClientTest_mvc/joinsk.jsp");
 			}
 		}	
 	}
@@ -78,4 +84,21 @@ public class ClientTestController extends HttpServlet {
 		response.sendRedirect("../ClientTest_mvc/joinn.html");
 	}
 	
+	public void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.sendRedirect("../ClientTest_mvc/logout.jsp");
+	}
+	
+	public void loginS(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		ClientTestService service = ClientTestService.getInstance();
+		String id = request.getParameter("id");
+		String password = request.getParameter("password");
+		if( id == null || id.equals("") || password==null || password.equals("")) {
+			response.sendRedirect("../ClientTest_mvc/index.jsp");
+		}else {
+			ArrayList<ClientMembers> list = service.loginSS(id , password);
+			request.setAttribute("loginJ", list);
+			RequestDispatcher rd = request.getRequestDispatcher("../ClientTest_mvc/logins.jsp");
+			rd.forward(request, response);
+		}
+	}
 }

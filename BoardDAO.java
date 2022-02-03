@@ -1,153 +1,154 @@
-package soo.mv.model;
+package board.mvc.model;
+
+import java.sql.Statement;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.sql.*;
 
-public class BoardDAO {
+import borad.domain.boardS;
+
+class BoardDAO {
 	private DataSource ds;
 	public BoardDAO() {
-		try {
-			Context initContext = new InitialContext();
-			Context envContext  = (Context)initContext.lookup("java:/comp/env");
-			ds = (DataSource)envContext.lookup("jdbc/myoracle");
-		} catch(NamingException ne) {	
+		try { // InitialContext은 웹어플리케이션이 처음 배치 될 때 사용됨.
+			Context inContext = new InitialContext(); // 어떤일을 하기위해서 제공하는 정보 Context 라이브러리에 있는 거찾아오려 고 처음에 생성하고
+			Context envContext = (Context)inContext.lookup("java:/comp/env"); // JNDI resource라고 함 자원의 위치 라이브러리를 들고오는거저장
+			ds = (DataSource)envContext.lookup("jdbc/myoracle"); // 커넥션풀 들고오기
+		}catch(NamingException ne){		
 		}
 	}
 	
-	public ArrayList<BoardDTO> list(){
-		ArrayList<BoardDTO> list = new ArrayList<BoardDTO>();
+	ArrayList<boardS> list(){
+		ArrayList<boardS> list = new ArrayList<boardS>();
 		Connection con = null;
-		Statement stmt = null;
+		Statement st =null;
 		ResultSet rs = null;
-		String sql = "select * from BOARD order by SEQ desc";
-		try{
+		String sql = BoardSQL.LIST;
+		try {
 			con = ds.getConnection();
-			stmt = con.createStatement();
-			rs = stmt.executeQuery(sql);
-			while(rs.next()){
-				int seq = rs.getInt(1);
+			st = con.createStatement();
+			rs = st.executeQuery(sql);
+			while(rs.next()) {
+				int seq = rs.getInt("seq");
 				String writer = rs.getString(2);
 				String email = rs.getString(3);
 				String subject = rs.getString(4);
 				String content = rs.getString(5);
 				Date rdate = rs.getDate(6);
-				
-				list.add(new BoardDTO(seq, writer, email, subject, content, rdate));
-			}
-			return list;
-		}catch(SQLException se){
-			System.out.println("list() exception: " + se);
+				list.add(new boardS(seq, writer, email, subject, content, rdate));
+			}return list;		
+		}catch(SQLException se) {
 			return null;
-		} finally{
-			try{
-				if(rs!=null) rs.close();
-				if(stmt!=null) stmt.close();
-				if(con!=null) con.close();
-			} catch(SQLException se){
-				System.out.println("finally : " + se);
+		}finally {
+			try {
+				if(rs != null) rs.close();
+				if(st != null) st.close();
+				if(con != null) con.close();
+			}catch(SQLException se){	
 			}
 		}
-	} // end of list()
-	
-	public ArrayList<BoardDTO> content(int seq) {
-		ArrayList<BoardDTO> contentList = new ArrayList<BoardDTO>();
+		}
+	ArrayList<boardS> content(int seq){
+		ArrayList<boardS> contents = new ArrayList<boardS>();
 		Connection con = null;
 		PreparedStatement pstmt = null;
-		String sql ="select * from BOARD where SEQ=?";
-
+		String sql = BoardSQL.CONTENT;
 		ResultSet rs = null;
-			try{
-				con = ds.getConnection();
-				pstmt = con.prepareStatement(sql);
-				pstmt.setInt(1, seq);
-				rs = pstmt.executeQuery();
-				while(rs.next()){
-					//seq=rs.getInt(1);
-					String writer = rs.getString(2);
-					String email = rs.getString(3);
-					String subject = rs.getString(4);
-					String content = rs.getString(5);
-					Date rdate = rs.getDate(6);
-					
-					contentList.add(new BoardDTO(seq, writer, email, subject, content, rdate));
-				}
-				return contentList;
-			} catch(SQLException se){
-				System.out.println("content sql 예외: " + se);
-				return null;
-			}finally{
-				try{
-					if(rs!=null) rs.close();
-					if(pstmt!=null) pstmt.close();
-					if(con!=null) con.close();
-				}catch(SQLException se){
-				}
-			}
-	} // end of content();
+		try {
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			pstmt.setInt(1, seq);
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				String writer = rs.getString(2);
+				String email = rs.getString(3);
+				String subject = rs.getString(4);
+				String content = rs.getString(5);
+				Date rdate = rs.getDate(6);
+				contents.add(new boardS(seq, writer, email, subject, content, rdate));
+			}return contents;
+		}catch(SQLException se) {
+			return null;
+		}finally {
+			try {
+				if(rs !=null) rs.close();
+				if(pstmt !=null) pstmt.close();
+				if(con != null) con.close();
+			}catch(SQLException se) {}
+		}
+	}
 	
-	public boolean insert(BoardDTO dto) {
+	boolean insert(boardS dto) {
 		Connection con = null;
 		PreparedStatement pstmt = null;
-		String sql = "insert into BOARD values(BOARD_SEQ.nextval, ?, ?, ?, ?, SYSDATE)";
-
-		try{
+		String sql = BoardSQL.INSERT;
+		try {
 			con = ds.getConnection();
 			pstmt = con.prepareStatement(sql);
 			pstmt.setString(1, dto.getWriter());
 			pstmt.setString(2, dto.getEmail());
 			pstmt.setString(3, dto.getSubject());
 			pstmt.setString(4, dto.getContent());
-
 			int i = pstmt.executeUpdate();
-			if(i>0){
+			if(i>0) {
 				return true;
-			} else{
+			}else {
 				return false;
 			}
-		} catch(SQLException se){
-			System.out.println("입력 실패 (MV)" + se);
+		}catch(SQLException se) {
 			return false;
-		} finally{
-			try{
-				if(pstmt!=null) pstmt.close();
-				if(con!=null) con.close();
-			}catch(SQLException se){
-			}
+		}finally {
+			try {
+				pstmt.close();
+				con.close();
+			}catch(SQLException se) {}
 		}
-	} // end of insert()
+	}
 	
-	public void delete(BoardDTO dto) {
+	
+	boolean delete(boardS dto) {
 		Connection con = null;
 		PreparedStatement pstmt = null;
-		String sql = "delete from BOARD where seq=?";
+		String sql = BoardSQL.DELETE;
 
 		if(dto.getSeq() != -1){
 			try{
 				con = ds.getConnection();
 				pstmt = con.prepareStatement(sql);
 				pstmt.setInt(1, dto.getSeq());
-				pstmt.executeUpdate();
+				int i = pstmt.executeUpdate();
+				if(i>0){
+					return true;
+				} else{
+					return false;
+				}
 			}catch(SQLException se){
 				System.out.println("delete() exception se: "+se);
+				return false;
 			}finally{
 				try{
 					if(pstmt!=null) pstmt.close();
 					if(con!=null) con.close();
 				}catch(SQLException se){
+					return false;
 				}
 			}
 		}
-	} // end of delete()
-	
-	public ArrayList<BoardDTO> updateForm(int seq) {
-		ArrayList<BoardDTO> updateFormList = new ArrayList<BoardDTO>();
+		return false;
+	}
+	ArrayList<boardS> updateForm(int seq) {
+		ArrayList<boardS> updateFormList = new ArrayList<boardS>();
 		Connection con = null;
 		PreparedStatement pstmt1 = null;
-		String sql1 ="select * from BOARD where SEQ=?";
+		String sql1 = BoardSQL.UPDATEFORM;
 		ResultSet rs = null;
 		try{
 			con = ds.getConnection();
@@ -162,7 +163,7 @@ public class BoardDAO {
 				String content = rs.getString(5);
 				Date rdate = rs.getDate(6);
 				
-				updateFormList.add(new BoardDTO(seq, writer, email, subject, content, rdate));
+				updateFormList.add(new boardS(seq, writer, email, subject, content, rdate));
 			}
 			return updateFormList;
 		} catch(SQLException se){
@@ -174,12 +175,13 @@ public class BoardDAO {
 				if(con!=null) con.close();
 			}catch(SQLException se){}
 		}
-	} // end of updateForm()
+	}
 	
-	public boolean update(BoardDTO dto) {
+	
+	boolean update(boardS dto) {
 		Connection con = null;
 		PreparedStatement pstmt2 = null;
-		String sql2 ="update BOARD set SUBJECT=?, CONTENT=? where SEQ=?";
+		String sql2 =BoardSQL.UPDATE;
 
 		try{
 			con = ds.getConnection();
@@ -187,7 +189,6 @@ public class BoardDAO {
 			pstmt2.setString(1, dto.getSubject());
 			pstmt2.setString(2, dto.getContent());
 			pstmt2.setInt(3, dto.getSeq());
-
 			int i = pstmt2.executeUpdate();
 			if(i>0){
 				return true;
@@ -199,5 +200,5 @@ public class BoardDAO {
 			System.out.println("update() (MV) 실패 se: " + se);
 			return false;
 		} 
-	} // end of update()
-} // end of class
+	}
+}
