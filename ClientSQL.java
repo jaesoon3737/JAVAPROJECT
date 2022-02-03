@@ -12,7 +12,8 @@ class ClientSQL {
 	final static String JOINCHECK = "SELECT * FROM MEMBER";
 	final static String JOIN ="INSERT INTO MEMBER VALUES ( MEMBER_SEQ.nextval , ? , ? , ? , ? , ? , default )";
 	final static String LOGINS = "SELECT * FROM MEMBER WHERE ID = ? ";
-	
+	final static String POWERUPDATE = "UPDATE MEMBER SET POWER = ? WHERE ID = ? ";
+	final static String NICKNAMEUPDATE = "UPDATE MEMBER SET NICKNAME = ? WHERE ID = ? ";
 	
 	
 	

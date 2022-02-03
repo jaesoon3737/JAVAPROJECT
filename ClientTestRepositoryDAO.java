@@ -18,6 +18,7 @@ import ClientTest.domain.ClientMembers;
 
 
 
+
  class ClientTestRepositoryDAO implements ClientTestRepository {
 	 
 	DataSource ds;
@@ -50,6 +51,8 @@ import ClientTest.domain.ClientMembers;
 					cm.setId(rs.getString("id"));
 					cm.setName(rs.getString("name"));
 					cm.setEmail(rs.getString("email"));
+					cm.setPower(rs.getString("power"));
+					cm.setNickName(rs.getString("nickName"));
 					member.add(cm);
 				}
 				return member;
@@ -312,7 +315,51 @@ import ClientTest.domain.ClientMembers;
 		
 	}
 	
+	boolean update(String id ,String power) {
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		String sql = ClientSQL.POWERUPDATE;
+
+		try{
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, power);
+			pstmt.setString(2, id);
+			int i = pstmt.executeUpdate();
+			if(i>0){
+				return true;
+			} else{
+				System.out.println("권한 변경 실패");
+				return false;
+			}
+		} catch(SQLException se){
+			System.out.println("권한변경 실패 se: " + se);
+			return false;
+		} 
+	}
 	
+	boolean updateN(String id ,String nickName) {
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		String sql = ClientSQL.NICKNAMEUPDATE;
+
+		try{
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, nickName);
+			pstmt.setString(2, id);
+			int i = pstmt.executeUpdate();
+			if(i>0){
+				return true;
+			} else{
+				System.out.println("닉네임 변경 실패");
+				return false;
+			}
+		} catch(SQLException se){
+			System.out.println("닉네임 실패 se: " + se);
+			return false;
+		} 
+	}
 	
     private void close(Connection con, PreparedStatement pstmt, ResultSet rs)
     {	

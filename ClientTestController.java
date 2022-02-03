@@ -1,14 +1,15 @@
 package ClientTestControl;
 
-import jakarta.servlet.RequestDispatcher;
+import javax.servlet.RequestDispatcher;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import ClientTest.domain.ClientMembers;
 import ClientTestRepository.ClientTestService;
@@ -27,6 +28,7 @@ public class ClientTestController extends HttpServlet {
 	public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String m = request.getParameter("m");
 		String check = request.getParameter("check");
+		String checked = request.getParameter("checked");
 		if(m != null) {
 			m.trim();
 			switch(m) {
@@ -40,13 +42,44 @@ public class ClientTestController extends HttpServlet {
 			case "joinIndex" : joinIndex(request,response); break;
 			case "logins" : loginS(request,response); break;
 			case "logout" : logout(request,response); break;
+			case "AllFind": AllFind(request,response); break;
+			case "powerchange" : {
+					if(checked.equals("닉네임변경")) {
+						nickNameChange(request,response); break;
+					}else if(checked.equals("권한변경")) {
+						powerchange(request,response); break;
+					}
+				}
 			
 			}
 		}else {
 			response.sendRedirect("../ClientTest_mvc");
 		}
 	}
-	
+	public void powerchange (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		ClientTestService service = ClientTestService.getInstance();
+		String id = request.getParameter("fnames");
+		String power = request.getParameter("fname");
+		System.out.println(""+id+power);
+		boolean flag = service.powerupdateS(id , power);
+		request.setAttribute("powerchange", flag);
+		
+		RequestDispatcher rd = request.getRequestDispatcher("../addr/powerchange.jsp");
+		rd.forward(request, response);		
+		
+	}
+	public void nickNameChange (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		ClientTestService service = ClientTestService.getInstance();
+		String id = request.getParameter("fnames");
+		String nickName = request.getParameter("nickChange");
+		System.out.println(""+id+nickName);
+		boolean flag = service.nicknameupdateS(id , nickName);
+		request.setAttribute("nickchange", flag);
+		
+		RequestDispatcher rd = request.getRequestDispatcher("../addr/nicknamechange.jsp");
+		rd.forward(request, response);		
+		
+	}
 	public void joinCheck (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		ClientTestService service = ClientTestService.getInstance();
 		String id = request.getParameter("id");
@@ -56,6 +89,14 @@ public class ClientTestController extends HttpServlet {
 		RequestDispatcher rd = request.getRequestDispatcher("../ClientTest_mvc/joinCheck.jsp");
 		rd.forward(request, response);		
 		
+	}
+	public void AllFind(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		ClientTestService service = ClientTestService.getInstance();
+		List<ClientMembers> list = service.AllFindS();
+		request.setAttribute("All" , list);
+		
+		RequestDispatcher rd = request.getRequestDispatcher("../addr/Memberlist.jsp");
+		rd.forward(request, response);	
 	}
 	
 	public void joinMember (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

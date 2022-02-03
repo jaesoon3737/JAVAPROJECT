@@ -7,12 +7,12 @@
 %>
 
 <script>
-	if(${updates}){
-		alert("update JSTL 은 다 데헷");
-	} else{
-		alert("update 데 ㅔ헤 ㅅ");
+	if(${powerchange}){
+		alert("JSTL용 권한변경완료");
+	}else{
+		alert("권한변경실패");
 	}
-	location.href="boa.do?m=list";
+	location.href="../boardk/clientLoginS?m=AllFind";
 </script>
 
 

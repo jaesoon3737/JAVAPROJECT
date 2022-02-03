@@ -1,19 +1,15 @@
-<%@ page contentType="text/html;charset=utf-8" import="javax.sql.DataSource, java.sql.* , java.util.*"%>
-<jsp:useBean id="addrDAO" class="soo.mv.model.AddrDAO" scope="application"/>
-<jsp:useBean id="dto" class="soo.mv.model.AddrDTO"/>
-<jsp:setProperty name="dto" property="*"/>
+<%@ page contentType="text/html;charset=utf-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <%
-		boolean flag = addrDAO.insert(dto);
+	//boolean flag = (Boolean)request.getAttribute("flag");
 %>
 
-		<script>
-			if(<%=flag%>){
-				alert("DA입력성공");
-				
-			}else{
-				alert("DA입력실패");	
-			}
-		
-		location.href='list.jsp';// �ڹٽ�ũ��Ʈ �����̼� ����ָ� �̸��� �ٷ� ���ư�
-		</script>
-
+<script>
+	if(${flag}){
+		alert("insert 성공! 데헷(MVC) ");
+	} else{
+		alert("isnert 실패! 잇");
+	}
+	location.href="boa.do?m=list";
+</script>

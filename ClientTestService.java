@@ -20,6 +20,13 @@ public class ClientTestService {
 		return dao.joincheck(id); // insert 회원가입
 	}
 	
+	public boolean powerupdateS(String id, String power) {
+		return dao.update(id, power); // insert 회원가입
+	}
+	
+	public boolean nicknameupdateS(String id, String nickName) {
+		return dao.updateN(id, nickName); // insert 회원가입
+	}
 	public boolean joinS(String id , String password , String name , String nickname , String email) {
 		return dao.join(id, password, name, nickname, email);
 	}
@@ -30,5 +37,9 @@ public class ClientTestService {
 	
 	public ArrayList<ClientMembers> loginSS(String id , String password) {
 		return dao.logins(id , password); // id 로그인
+	}
+	
+	public List<ClientMembers> AllFindS() {
+		return dao.allFind(); // id 로그인
 	}
 }
