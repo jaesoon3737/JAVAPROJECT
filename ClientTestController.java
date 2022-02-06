@@ -1,15 +1,19 @@
 package ClientTestControl;
 
 import javax.servlet.RequestDispatcher;
-
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import ClientTest.domain.ClientMembers;
 import ClientTestRepository.ClientTestService;
@@ -48,6 +52,8 @@ public class ClientTestController extends HttpServlet {
 						nickNameChange(request,response); break;
 					}else if(checked.equals("권한변경")) {
 						powerchange(request,response); break;
+					}else if(checked.equals("로그아웃")) {
+						 logout(request,response); break;
 					}
 				}
 			
@@ -106,7 +112,9 @@ public class ClientTestController extends HttpServlet {
 		String passwordCheck = request.getParameter("passwordCheck");
 		String name = request.getParameter("name");
 		String nickName = request.getParameter("nickName");
-		String email = request.getParameter("email");
+		String emai = request.getParameter("email");
+		String emailget = request.getParameter("emailget");
+		String email = emai+"@"+emailget;
 		if(id == null || password == null || passwordCheck == null || name == null || nickName == null || email == null || id.equals("") || password.equals("") || passwordCheck.equals("") || name.equals("") || nickName.equals("") || email.equals("") ) {
 			response.sendRedirect("../ClientTest_mvc/joinsk.jsp");
 		}else {
@@ -114,7 +122,7 @@ public class ClientTestController extends HttpServlet {
 				boolean flag = service.joinS(id , password , name , nickName , email);
 				request.setAttribute("joinMember", flag);
 				RequestDispatcher rd = request.getRequestDispatcher("../ClientTest_mvc/joinMember.jsp");
-				rd.forward(request, response);		
+				rd.forward(request, response);	
 			}else {
 				response.sendRedirect("../ClientTest_mvc/joinsk.jsp");
 			}
@@ -140,6 +148,26 @@ public class ClientTestController extends HttpServlet {
 			request.setAttribute("loginJ", list);
 			RequestDispatcher rd = request.getRequestDispatcher("../ClientTest_mvc/logins.jsp");
 			rd.forward(request, response);
+		}
+	}
+		
+
+	public void files(ServletConfig config) throws ServletException{
+		String propertie = config.getInitParameter("propertyConfig");
+		Properties pr = new Properties();
+		FileInputStream fr = null;
+		String path = config.getServletContext().getRealPath("WEB-INF");
+		try {
+			fr = new FileInputStream(new File(path,propertie));
+			pr.load(fr);
+		}catch(IOException io) {
+			
+		}finally {
+			try {
+				fr.close();
+			}catch(IOException ie) {
+				
+			}
 		}
 	}
 }

@@ -9,7 +9,7 @@ class ClientSQL {
 	final static String EMAIL = "SELECT * FROM MEMBER where id = ?";
 	final static String LOGINCHECK = "SELECT * FROM MEMBER where id = ?";
 	final static String LOGININFO = "SELECT * FROM MEMBER where id = ?";
-	final static String JOINCHECK = "SELECT * FROM MEMBER";
+	final static String JOINCHECK = "SELECT * FROM MEMBER where id = ?";
 	final static String JOIN ="INSERT INTO MEMBER VALUES ( MEMBER_SEQ.nextval , ? , ? , ? , ? , ? , default )";
 	final static String LOGINS = "SELECT * FROM MEMBER WHERE ID = ? ";
 	final static String POWERUPDATE = "UPDATE MEMBER SET POWER = ? WHERE ID = ? ";

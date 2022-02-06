@@ -27,6 +27,7 @@ public class ClientTestService {
 	public boolean nicknameupdateS(String id, String nickName) {
 		return dao.updateN(id, nickName); // insert 회원가입
 	}
+	
 	public boolean joinS(String id , String password , String name , String nickname , String email) {
 		return dao.join(id, password, name, nickname, email);
 	}

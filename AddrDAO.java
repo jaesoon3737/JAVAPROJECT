@@ -1,4 +1,5 @@
-package soo.mv.model;
+package addr.mvc.model;
+
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -12,201 +13,361 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Vector;
 
+import mvc.domain.Address;
+import mvc.domain.setPage;
 
-public class AddrDAO {
+ class AddrDAO {
 	private DataSource ds;
-	public AddrDAO(){
-		try{
+	private Vector<setPage> spv;
+	AddrDAO() {
+		try {
 			Context initContext = new InitialContext();
 			Context envContext  = (Context)initContext.lookup("java:/comp/env");
 			ds = (DataSource)envContext.lookup("jdbc/myoracle");
-		}catch(NamingException ne){
-			System.out.println("#tomcat이 만든 dbcp객체(jdbc/myoracle)이름을 못찾음");
+		} catch(NamingException ne) {	
 		}
-		//Connection conn = ds.getConnection();
-	}
-	public DataSource getDs(){
-		return ds;
 	}
 	
-	public ArrayList<AddrDTO> list(){
-		Connection con =null;
-		Statement st =null;
+	
+	int viewCountK(Integer seq) {
+		Connection con = null;
+		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		ArrayList<AddrDTO> list = new ArrayList<AddrDTO>();
-		try{
-			con = ds.getConnection();
-			st = con.createStatement();
-			String selecSQL = "select eriCount, id ,name ,title , borderdate  from Borders ORDER BY eriCount DESC";
-			rs = st.executeQuery(selecSQL);
-			while(rs.next()){
-				int eriCount = rs.getInt("eriCount");
-				String id = rs.getString("id");
-				String name = rs.getString("name");
-				String title = rs.getString("title");
-				Date borderdate = rs.getDate("borderdate");
-				list.add(new AddrDTO(eriCount, id, name, title, borderdate));
-			}
-				return list;
-			}catch(SQLException se4){
-					System.out.println("셀렉문 계시판 글쓰기 저장실패" + se4);
-					return null;
-			}finally{
-				try{
-					rs.close();
-					st.close();
-					con.close();
-			}catch(SQLException se){
-			}	
-		}			
-	}
-	
-	public boolean insert(AddrDTO dto) {
-		String inseSQL = "insert into Borders values ( eriCountSEQ.nextval , ? , ? , ? , SYSDATE , ? )";
-		Connection con = null;
-		PreparedStatement ptst =null;
+		String sql = AddrSQL.VIEWCOUNTS;
 
-		try{
+		try {
 			con = ds.getConnection();
-			ptst = con.prepareStatement(inseSQL);
-			ptst.setString(1, dto.getId());
-			ptst.setString(2, dto.getName());
-			ptst.setString(3, dto.getTitle());
-			ptst.setString(4, dto.getContents());
-			int i =ptst.executeUpdate();
-			if(i>0) {
-				return true;
-			}else{
-				return false;	
-			}
-		}catch(SQLException se){
-
-		}finally{
-			try{
-				if(ptst != null) ptst.close();
-				if(con != null) con.close();
-			}catch(SQLException se){}
-		
-		}return false;
-		
-		
-	}
-	public boolean delete(AddrDTO dto) {
-		String sql = "delete from Borders where eriCount = ? ";
-		Connection con = null;
-		PreparedStatement ptmt = null;
-		
-		try{
-	
-			con = ds.getConnection();
-			ptmt = con.prepareStatement(sql);
-			ptmt.setInt(1, dto.getEricount());
-		}catch(SQLException se){
-			System.out.println("실패2" + se);
-			return false;		
-		}
-		try{
-			int i = ptmt.executeUpdate();
-			if(i>0) {
-				return true;
-			}else {
-				return false;
-			}
-		}catch(SQLException se1){
-			return false;
-		}finally{
-			try{
-				if(ptmt != null) ptmt.close();
-				if(con != null)  con.close();
-			}catch(SQLException se){}
-		}
-		
-	}
-	public ArrayList<AddrDTO> contents(int eContst) {
-		ArrayList<AddrDTO> lists = new ArrayList<AddrDTO>();
-		Connection con = null;
-		Statement st = null;
-	    ResultSet rs = null;
-	    String selecSQL = "select eriCount, id ,name ,title , borderdate , contents from Borders where eriCount ="+eContst+"";
-		try{
-			con = ds.getConnection();
-			st = con.createStatement();
-			rs = st.executeQuery(selecSQL);
-			while(rs.next()){
-				int eriCount = rs.getInt("eriCount");
-				String id = rs.getString("id");
-				String name = rs.getString("name");
-			    String title = rs.getString("title");
-				Date borderdate = rs.getDate("borderdate");
-				String contents = rs.getString("contents");
-				lists.add(new AddrDTO(eriCount, id, name, title, borderdate, contents));
-				}
-				return lists;
-			}catch(SQLException se) {		
-			}finally{
-				try {
-					rs.close();
-					con.close();
-					st.close();
-				}catch(SQLException se1){}
-			}return null;
-		}
-	public ArrayList<AddrDTO> update1(int eriCount , String id) {
-		ArrayList<AddrDTO> list = new ArrayList<AddrDTO>();
-		Connection con = null;
-		Statement st = null;
-
-		System.out.println(eriCount+id+"");
-		ResultSet rs = null;
-		try{
-			con = ds.getConnection();
-			st = con.createStatement();
-			String selecSQL = "select * from Borders where eriCount ="+eriCount+"";
-			rs = st.executeQuery(selecSQL);
-			while(rs.next()){
-				eriCount = rs.getInt("eriCount");
-				id = rs.getString("id");
-				String name = rs.getString("name");
-				String title = rs.getString("title");
-				Date borderdate =rs.getDate("borderdate");
-				String contents = rs.getString("contents");
-				list.add(new AddrDTO(eriCount, id, name, title, borderdate, contents));
-			}return list;
-		
-		}catch(SQLException se){	
-			return null;
+			pstmt = con.prepareStatement(sql);
+			pstmt.setInt(1, seq);
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+			int count = rs.getInt(1);
+			count++;
+			return count;
+			}return -2;
+		}catch(SQLException se) {
+			System.out.println("에러"+se);
+			return -3;
 		}finally {
 			try {
-				rs.close();
-				st.close();
 				con.close();
-			}catch(SQLException se1){}
+				pstmt.close();
+			}catch(SQLException se) {	
+			}
 		}
 	}
 	
-	public boolean update2(String name , String title , String contents , int eriCount) {
+	void viewCountUpdate(Integer seq , int count) {
 		Connection con = null;
-		Statement st = null;
+		PreparedStatement pstmt = null;
+		String sql = AddrSQL.VIEWCOUNTUPDATE;
+		try {
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			//int countQ = count;
+			pstmt.setInt(1 , count);
+			pstmt.setInt(2, seq);
+			int i = pstmt.executeUpdate();
+			if(i == 1) {
+				System.out.println("업데이트 성공");
+			}else {
+				System.out.println("업데이트 실패 ");
+			}
+		}catch(SQLException se) {
+		}finally{
+			try {
+				con.close();
+				pstmt.close();
+			}catch(SQLException se){
+				
+			}
+		}
+	}
+	
+	int counts(){
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		String sql = AddrSQL.COUNT;
 		try{
 			con = ds.getConnection();
-			st = con.createStatement();
-			String selecSQL = "update borders set name ='"+name+"' , title = '"+title+"' , contents = '"+contents+"' where eriCount ="+eriCount+"";
-			int i = st.executeUpdate(selecSQL);
-			if(i>0) {
-				return true;	
-			}else {
-				return false;		
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(sql);
+			while(rs.next()){
+				int count= rs.getInt(1);
+				return count;
 			}
-		}catch(SQLException se4){
-			System.out.println("수정  저장실패" + se4);
-			return false;		
-		}finally{
+			return -1;
+		}catch(SQLException se){
+			System.out.println("count() exception: " + se);
+			return -1;
+		} finally{
 			try{
-				if(st != null) st.close();
-				if(con != null) con.close();
-			}catch(SQLException se){}
+				if(rs!=null) rs.close();
+				if(stmt!=null) stmt.close();
+				if(con!=null) con.close();
+			} catch(SQLException se){
+				System.out.println("count : " + se);
+			}
+		}
+	} // end of list()
+	Vector<setPage> page(Integer pageIndex) {
+		spv = new Vector<setPage>();
+		System.out.println("listDao 오늘의 검증 page"+"ss :"+ pageIndex);
+		spv.add(new setPage(-1, pageIndex, -1, -1));
+		
+		return spv;
+	}
+	
+	ArrayList<Address> list(Integer page){
+		ArrayList<Address> list = new ArrayList<Address>();
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = AddrSQL.LIST;
+		int pageIndex = -1;
+		if(this.spv == null) {
+			 page = 1;
+			 pageIndex = 5;
+		}else {
+			for(setPage dk : spv){
+				if( dk.getPageIndex() != -1) {
+				  //page = dk.getViewPage();
+				  pageIndex = dk.getPageIndex();
+				  System.out.println("listDao pageIndex : " + pageIndex);
+				}else {
+					System.out.println("listDao 에러 인덱스 못찾음 널");
+				}
+			}
+		}
+		int tPage = pageIndex;
+		int pageEnd = pageIndex;
+		int pageStart = -1;
+		System.out.println("page number :" + page);
+		if(page>=2 && pageIndex==5) {
+			tPage = 5;
+			pageStart = page * tPage - 4;
+			pageEnd = page * 5;
+			System.out.println("페이지 pageindex5" + page);
+		}else if(page >=2 && pageIndex==7) {
+			tPage = 7;
+			pageStart = page * tPage - 6; // 8
+			pageEnd = page * 7; //
+			System.out.println("페이지 pageindex7" + page);
+		}else if(page >=2 && pageIndex==10) {
+			tPage = 10;
+			pageStart = page * tPage - 9;
+			pageEnd = page * 10;
+			System.out.println("페이지 pageindex10" + page);
+		}else if(page >=2 && pageIndex==15) {
+			tPage = 15;
+			pageStart = page * tPage - 14;
+			pageEnd = page * 15;
+			System.out.println("페이지 pageindex15" + page);
 		}
 		
-	}
-}
+		System.out.println("들어가기전 페이지값 page :" + page + "pagened :" + pageEnd);
+		System.out.println("sql" + sql);
+		try{
+			//System.out.println("1");
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			pstmt.setInt(1, pageStart);
+			pstmt.setInt(2, pageEnd);
+			//System.out.println("2");
+			rs = pstmt.executeQuery();
+			//System.out.println("3");
+			while(rs.next()){
+				int seq = rs.getInt("seq");
+				//System.out.println("4");
+				String writer = rs.getString("writer");
+				String email = rs.getString("email");
+				String subject = rs.getString("subject");
+				String content = rs.getString("content");
+				Date rdate = rs.getDate("rdate");
+				int viewCount = rs.getInt("viewcount");
+				
+				//System.out.println(writer +email + subject + "");
+				//for(int i=0;i<list.size();i++) {
+					//Object s = list.get(i);
+					//System.out.println(s.toString());
+				//}
+				list.add(new Address(seq, writer, email, subject, content, rdate , viewCount));
+				
+			}
+			//System.out.println("5");
+			return list;
+		}catch(SQLException se){
+			System.out.println("list() exception: " + se);
+			return null;
+		} finally{
+			try{
+				if(rs!=null) rs.close();
+				if(pstmt!=null) pstmt.close();
+				if(con!=null) con.close();
+				System.out.println("닫음 ");
+			} catch(SQLException se){
+				System.out.println("finally : " + se);
+			}
+		}
+		
+	} // end of list()
+	
+	ArrayList<Address> content(int seq) {
+		ArrayList<Address> contentList = new ArrayList<Address>();
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		String sql =AddrSQL.CONTENT;
+		
+		ResultSet rs = null;
+			try{
+				con = ds.getConnection();
+				pstmt = con.prepareStatement(sql);
+				pstmt.setInt(1, seq);
+				rs = pstmt.executeQuery();
+				while(rs.next()){
+					//seq=rs.getInt(1);
+					String writer = rs.getString(2);
+					String email = rs.getString(3);
+					String subject = rs.getString(4);
+					String content = rs.getString(5);
+					Date rdate = rs.getDate(6);
+					int viewCount = rs.getInt(7);
+					contentList.add(new Address(seq, writer, email, subject, content, rdate ,  viewCount));
+				}
+				return contentList;
+			} catch(SQLException se){
+				System.out.println("content sql 예외: " + se);
+				return null;
+			}finally{
+				try{
+					if(rs!=null) rs.close();
+					if(pstmt!=null) pstmt.close();
+					if(con!=null) con.close();
+				}catch(SQLException se){
+				}
+			}
+	} // end of content();
+	
+	boolean insert(Address dto , String writer , String Email) {
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		String sql = AddrSQL.INSERT;
+
+		try{
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, writer);
+			pstmt.setString(2, Email);
+			pstmt.setString(3, dto.getSubject());
+			pstmt.setString(4, dto.getContent());
+
+			int i = pstmt.executeUpdate();
+			if(i>0){
+				return true;
+			} else{
+				return false;
+			}
+		} catch(SQLException se){
+			System.out.println("입력 실패 (MV)" + se);
+			return false;
+		} finally{
+			try{
+				if(pstmt!=null) pstmt.close();
+				if(con!=null) con.close();
+			}catch(SQLException se){
+			}
+		}
+	} // end of insert()
+	
+	boolean delete(Address dto) {
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		String sql = AddrSQL.DELETE;
+
+		if(dto.getSeq() != -1){
+			try{
+				con = ds.getConnection();
+				pstmt = con.prepareStatement(sql);
+				pstmt.setInt(1, dto.getSeq());
+				int i = pstmt.executeUpdate();
+				if(i>0){
+					return true;
+				} else{
+					return false;
+				}
+			}catch(SQLException se){
+				System.out.println("delete() exception se: "+se);
+				return false;
+			}finally{
+				try{
+					if(pstmt!=null) pstmt.close();
+					if(con!=null) con.close();
+				}catch(SQLException se){
+					return false;
+				}
+			}
+		}
+		return false;
+	} // end of delete()
+	
+	ArrayList<Address> updateForm(int seq) {
+		ArrayList<Address> updateFormList = new ArrayList<Address>();
+		Connection con = null;
+		PreparedStatement pstmt1 = null;
+		String sql1 = AddrSQL.UPDATEFORM;
+		ResultSet rs = null;
+		try{
+			con = ds.getConnection();
+			pstmt1 = con.prepareStatement(sql1);
+			pstmt1.setInt(1, seq);  
+			rs = pstmt1.executeQuery();
+
+			while(rs.next()){
+				String writer = rs.getString(2);
+				String email = rs.getString(3);
+				String subject = rs.getString(4);
+				String content = rs.getString(5);
+				Date rdate = rs.getDate(6);
+				int viewCount = rs.getInt(7);
+				updateFormList.add(new Address(seq, writer, email, subject, content, rdate , viewCount));
+			}
+			return updateFormList;
+		} catch(SQLException se){
+			System.out.println("select 예외: "+se);
+			return null;
+		} finally{
+			try{
+				if(pstmt1!=null) pstmt1.close();
+				if(con!=null) con.close();
+			}catch(SQLException se){}
+		}
+	} // end of updateForm()
+	
+	boolean update(Address dto) {
+		Connection con = null;
+		PreparedStatement pstmt2 = null;
+		String sql2 =AddrSQL.UPDATE;
+
+		try{
+			con = ds.getConnection();
+			pstmt2 = con.prepareStatement(sql2);
+			pstmt2.setString(1, dto.getSubject());
+			pstmt2.setString(2, dto.getContent());
+			pstmt2.setInt(3, dto.getSeq());
+
+			int i = pstmt2.executeUpdate();
+			if(i>0){
+				return true;
+			} else{
+				System.out.println("update() 실패");
+				return false;
+			}
+		} catch(SQLException se){
+			System.out.println("update() (MV) 실패 se: " + se);
+			return false;
+		} 
+	} // end of update()
+} // end of class

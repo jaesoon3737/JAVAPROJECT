@@ -13,13 +13,12 @@ public class ClientMembers {
 		public ClientMembers() {
 			super();
 		}
-		public ClientMembers(int number, String id, String password, String passwordChk, String name, String nickName,
+		public ClientMembers(int number, String id, String password, String name, String nickName,
 				String email, String power) {
 			super();
 			this.number = number;
 			this.id = id;
 			this.password = password;
-			this.passwordChk = passwordChk;
 			this.name = name;
 			this.nickName = nickName;
 			this.email = email;

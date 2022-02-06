@@ -163,8 +163,7 @@ import ClientTest.domain.ClientMembers;
 			if(dto.getId() != null) {
 				String getIds = dto.getId().toUpperCase();
 				pstmt.setString(1, getIds);
-			}
-			else {
+			}else {
 				return -1; // id¿¡·¯
 			}
 			rs = pstmt.executeQuery();
@@ -267,18 +266,16 @@ import ClientTest.domain.ClientMembers;
 		try {
 			con = ds.getConnection();
 			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, id);
 			rs = pstmt.executeQuery();
+			int s = 0;
 			while(rs.next()) {
-				String idCheck = rs.getString("id");
-				if(idCheck != null) {
-					if(idCheck.equalsIgnoreCase(id)) {
-						return false;
-					}else {
-						return true;
-					}
-				}else {
-					return false;
-				}
+				s++;
+			}
+			if(s==0) {
+				return true;
+			}else {
+				return false;
 			}
 		}catch(SQLException se) {
 			se.printStackTrace();
