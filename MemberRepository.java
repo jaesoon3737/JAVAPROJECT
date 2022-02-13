@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import javax.naming.Context;
@@ -27,6 +28,84 @@ public class MemberRepository { // DAO
 			}
 	}
 	
+	String loginMember(String email , String pwd){
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = MemberSQL.LOGIN;
+		String exist = null;
+		try {
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, email);
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				String emailCheck = rs.getString("email");
+				String pwdCheck = rs.getString("pwd");
+				if(emailCheck != null) {
+					if(pwdCheck.equals(pwd)){
+						return emailCheck;
+					} else {
+						exist = "not";
+						return exist;
+					}
+				} else {
+					exist = "not";
+					return exist;
+				}
+			} else {
+				exist = "not";
+				return exist;
+			}	
+		}catch(Exception e) {
+			throw new IllegalStateException(e);
+		}finally {
+			close(con, pstmt, rs);
+		}
+	}
+	
+	ArrayList<Member> loginComple(String emails , String pwds){
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = MemberSQL.LOGINCOMPLE;
+		ArrayList<Member> list = new ArrayList<Member>();
+		try {
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, emails);
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				String email = rs.getString("email");
+				long number = rs.getLong("mem_num");
+				String name =  rs.getString("mem_name");
+				Date birth = rs.getDate("birth");
+				String pwd = "";
+				String pwdCheck =  rs.getString("pwd");
+				String gradeDefaultValue = rs.getString("grade");
+				String nick = rs.getString("nick");
+				String phone = rs.getString("mem_phone");
+				String loc = rs.getString("mem_loc");
+				int gender = rs.getInt("gender");
+				Date anni = rs.getDate("anni");
+				int couple = rs.getInt("couple");
+				int license = rs.getInt("license");
+				
+				if(pwds.equals(pwdCheck)) {
+					list.add(new Member(email, number, name, birth, pwd, gradeDefaultValue, nick, phone, loc, gender, anni, couple, license));
+					return list;
+				} else {
+					return null;
+				}
+			}
+		}catch(Exception e) {
+			throw new IllegalStateException(e);
+		}finally {
+			close(con,pstmt,rs);
+		}
+		return null;
+		
+	}
 	boolean save(Member m) {
 		Connection con = null;
 		PreparedStatement pstmt = null;
@@ -79,6 +158,7 @@ public class MemberRepository { // DAO
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
 		String sql = MemberSQL.EMAILCHECK;
+		System.out.println("1");
 		try {
 			con = ds.getConnection();
 			pstmt = con.prepareStatement(sql);
