@@ -144,7 +144,12 @@ public class Member {
 		this.license = license;
 	}
 	
-	
-	
+	public String toString() {
+		
+		return "Member{" +
+				"email = " + email +
+				"memNumber = " + memNumber +
+				"memNAme = " + memName + "}";
+	}
 
 }

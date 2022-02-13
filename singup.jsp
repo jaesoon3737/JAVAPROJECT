@@ -54,8 +54,8 @@
 		<input type="email"  id="email" name="email" placeholder="이메일">
 		<input type='submit' id='checkEmailbutton' value='이메일 중복확인'>
 		<div   id="messages"></div>
-		<input type="password"  id="pwd" name="pwd" placeholder="비밀번호">
-		<input type="password"  class="passwordCheck" id="pwdCheck" name="pwdCheck" placeholder="비밀번호확인"><br>
+		<input type="password"  id="pwd" name="pwd" placeholder="비밀번호" minlength="8" >
+		<input type="password"  class="passwordCheck" id="pwdCheck" name="pwdCheck" placeholder="비밀번호확인" minlength="8" ><br>
 		<div   id='checkPw'></div>
 		<input type="text"  id="name"  name="name"  placeholder="이름">		<br>
 		<input type="date"  id="birth" name="birth" placeholder="생일">	<br>
