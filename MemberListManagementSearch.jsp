@@ -25,7 +25,7 @@
         <hr width='600' size='2' noshade>
     
 		<c:choose>
-		<c:when test="${sessionScope.Member_Grade == '관리자'}">
+		<c:when test="${sessionScope.Member_Grade == 'admin'}">
 		<form name='f' method='post' action='../member/mController?message=memberManagementChange'>
 			<select name ="fnames"> 
 				<c:forEach items="${allList}" var="memberListValue">
@@ -38,7 +38,7 @@
 			</select>
 			<input type='text' name='memberInfoChange' size='10' placeholder = "변경내용" >
 			<input type="submit" name = "checked" value="수정"/> 
-			  
+			<input type="submit" name = "checked" value="금칙닉네임"/>   
 			<table border='1' width='900' align='center' cellpadding='3' cellspacing='1'>
 				 <tr>
 				 	<th width='70' align='center'>이메일</th>

@@ -37,7 +37,7 @@ public class MemberContoller extends HttpServlet {
 			memberMessage.trim();
 			switch(memberMessage) {
 				case "emailCheck" :	 emailCheck(request , response); break; 
-				case "signup" :      signup(request , response); break;
+				case "signup" :  signup(request , response); break;
 				case "signform" :    signForm(request , response); break;
 				case "login" : 	     login(request , response); break;
 				case "logout" : 	 logout(request , response); break;
@@ -50,6 +50,8 @@ public class MemberContoller extends HttpServlet {
 										} else if(checked.equals("회원검색")) {
 											System.out.println("아 왜 2번돔"); 
 											memberManagementSearch(request , response); break;
+										} else if(checked.equals("금칙닉네임")) {
+											XwordSerch(request, response); break;
 										}
 				}
 				case "memberManagementSearch" : {
@@ -57,22 +59,75 @@ public class MemberContoller extends HttpServlet {
 											 memberUpdate(request, response); break;
 										} else if(checked.equals("회원검색")) {
 											memberManagementSearch(request , response); break;
+										} else if(checked.equals("금칙닉네임")) {
+											XwordSerch(request, response); break;
 										}
 				}
 				case "memberManagementFindform" : memberManagementInfoForm(request , response); break;
-
-			}
+				case "XwordSerch" :  XwordSerch(request, response); break;
+				case "memberUpdateUserAdmin" :  memberUpdateAdmin(request, response); break;
+				case "myPage" : userMyPage(request ,response); break;			}
 		} else {
 			loginForm(request , response);
 		}
+	}
+	public void XwordSerch(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		MemberService service = MemberService.getInstance();
+		boolean flag = service.updateMemberNickNameXSelect();
+		request.setAttribute("flag", flag);
+		
+		String view = "../Member/nickChange.jsp";
+		RequestDispatcher rd = request.getRequestDispatcher(view);
+		rd.forward(request, response);
+		
 	}
 	
 	public void  memberManagementInfoForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		MemberService service = MemberService.getInstance();
 		String email = request.getParameter("email");
 		Member MemberInfoE = service.MemberInfo(email);
+		String MemberLoc = MemberInfoE.getMemLoc();
+		String MemberLocq[] = MemberLoc.split(" ");
+		String MemberPostNumber = MemberLocq[0];
+		MemberPostNumber.trim();
+		String MemberAddress = "";
+		String MemberUpAddress = "";
+		if(MemberLocq.length==5) {
+			for(int i=1;i<5;i++) {
+					MemberAddress +=  MemberLocq[i] + " ";
+				}
+				MemberAddress.trim();
+					if(MemberLocq.length <=5) {
+						for(int i=5;i<MemberLocq.length;i++) {
+							MemberUpAddress +=  MemberLocq[i] + " ";
+						}
+					} else {
+						int splitLength = MemberLocq.length;
+						MemberUpAddress = MemberLocq[splitLength];
+					}
+		} else if(MemberLocq.length == 4){ 
+			for(int i=1;i<4;i++) {
+				MemberAddress +=  MemberLocq[i] + " ";
+			}
+			MemberAddress.trim();
+				if(MemberLocq.length <=4) {
+					for(int i=4;i<MemberLocq.length;i++) {
+						MemberUpAddress +=  MemberLocq[i] + " ";
+					}
+				} else {
+					int splitLength = MemberLocq.length;
+					MemberUpAddress = MemberLocq[splitLength];
+				}
+		} else {
+			for(int i=1;i<MemberLocq.length;i++) {
+				MemberAddress +=  MemberLocq[i] + " ";
+			}
+		}
+		MemberUpAddress.trim();
 		request.setAttribute("MemberInfoz", MemberInfoE);
-		
+		request.setAttribute("MemberLocPostNumber", MemberPostNumber);
+		request.setAttribute("MemberLocAddress", MemberAddress);
+		request.setAttribute("MemberLocUpAddress", MemberUpAddress);
 		
 		String view = "../Member/MemberInfo.jsp";
 		RequestDispatcher rd = request.getRequestDispatcher(view);
@@ -89,6 +144,28 @@ public class MemberContoller extends HttpServlet {
 		request.setAttribute("flag", flag);
 		
 		String view = "../Member/updateMember.jsp";
+		RequestDispatcher rd = request.getRequestDispatcher(view);
+		rd.forward(request, response);
+	}
+	
+	//  회원관리 상세 페이지 업데이트
+	public void memberUpdateAdmin(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		MemberService service = MemberService.getInstance();  //postNumber 
+		response.setCharacterEncoding("utf-8");
+		String email = request.getParameter("email");
+		String categoryChoicePwd = request.getParameter("pwd");
+		String categoryChoiceNick = request.getParameter("nick");
+		Integer categoryChoicePhone = Integer.parseInt(request.getParameter("phone"));
+		Integer categoryChoiceLisence = Integer.parseInt(request.getParameter("lisence"));
+		String categoryLoc1 = request.getParameter("postNumber");
+		String categoryLoc2 = request.getParameter("Address");
+		String categoryLoc3 = request.getParameter("upAddress");
+		String categoryLoc = categoryLoc1 + categoryLoc2  + categoryLoc3;
+		System.out.println(email +"  "+ categoryChoiceNick +"  "+ categoryChoicePwd);
+		boolean flag = service.updateMemberAdmin(email, categoryChoicePwd , categoryChoiceNick , categoryChoicePhone , categoryChoiceLisence , categoryLoc);
+		request.setAttribute("flag" , flag);
+		
+		String view = "../Member/memberPage.jsp";
 		RequestDispatcher rd = request.getRequestDispatcher(view);
 		rd.forward(request, response);
 	}
@@ -122,8 +199,9 @@ public class MemberContoller extends HttpServlet {
 		MemberService service = MemberService.getInstance();
 		response.setCharacterEncoding("utf-8");
 		String email = request.getParameter("email");
-		boolean flag = service.duplicateMember(email);
 		PrintWriter pw = response.getWriter();
+		boolean flag = service.duplicateMember(email);
+		System.out.println("jason 검증 :" + flag);
 		if(flag) {
 			pw.print("not-usable");
 			pw.close();
@@ -162,6 +240,59 @@ public class MemberContoller extends HttpServlet {
 	public void signForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.sendRedirect("../Member/singup.jsp");
 	}
+	public void userMyPage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+		
+		MemberService service = MemberService.getInstance();
+		String email = request.getParameter("email");
+		Member MemberInfoE = service.MemberInfo(email);
+		String MemberLoc = MemberInfoE.getMemLoc();
+		String MemberLocq[] = MemberLoc.split(" ");
+		String MemberPostNumber = MemberLocq[0];
+		MemberPostNumber.trim();
+		String MemberAddress = "";
+		String MemberUpAddress = "";
+		if(MemberLocq.length==5) {
+			for(int i=1;i<5;i++) {
+					MemberAddress +=  MemberLocq[i] + " ";
+				}
+				MemberAddress.trim();
+					if(MemberLocq.length <=5) {
+						for(int i=5;i<MemberLocq.length;i++) {
+							MemberUpAddress +=  MemberLocq[i] + " ";
+						}
+					} else {
+						int splitLength = MemberLocq.length;
+						MemberUpAddress = MemberLocq[splitLength];
+					}
+		} else if(MemberLocq.length == 4){ 
+			for(int i=1;i<4;i++) {
+				MemberAddress +=  MemberLocq[i] + " ";
+			}
+			MemberAddress.trim();
+				if(MemberLocq.length <=4) {
+					for(int i=4;i<MemberLocq.length;i++) {
+						MemberUpAddress +=  MemberLocq[i] + " ";
+					}
+				} else {
+					int splitLength = MemberLocq.length;
+					MemberUpAddress = MemberLocq[splitLength];
+				}
+		} else {
+			for(int i=1;i<MemberLocq.length;i++) {
+				MemberAddress +=  MemberLocq[i] + " ";
+			}
+		}
+		MemberUpAddress.trim();
+		request.setAttribute("MemberInfoz", MemberInfoE);
+		request.setAttribute("MemberLocPostNumber", MemberPostNumber);
+		request.setAttribute("MemberLocAddress", MemberAddress);
+		request.setAttribute("MemberLocUpAddress", MemberUpAddress);
+		
+		String view = "../Member/MemberInfo.jsp";
+		RequestDispatcher rd = request.getRequestDispatcher(view);
+		rd.forward(request, response);
+	}
 	
 	public void signup(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		MemberService service = MemberService.getInstance();
@@ -180,12 +311,12 @@ public class MemberContoller extends HttpServlet {
 		int gender = Integer.parseInt(request.getParameter("gender"));
 		int couple = Integer.parseInt(request.getParameter("couple"));
 		int license = Integer.parseInt(request.getParameter("license"));
-		Member m = new Member(email, -1 , name, birth, pwd, null , nick, phone, address, gender, anni, couple, license);
+		Member m = new Member(email, -1 , name, birth, pwd, null , nick, phone, address, gender, anni, couple, license , 0 );
 		boolean flag = service.saveService(m);
 		
 		request.setAttribute("flag", flag);
 		
-		String view = "../Member/login.jsp";
+		String view = "../Member/myPage.jsp";
 		RequestDispatcher rd = request.getRequestDispatcher(view);
 		rd.forward(request, response);
 	}
@@ -231,6 +362,7 @@ public class MemberContoller extends HttpServlet {
 					String sessionLoc = sessionIn.getMemLoc();
 					int sessionCouple = sessionIn.getCouple();
 					int sessionLicense = sessionIn.getLicense();
+					int sessionorderCount = sessionIn.getOrderCount();
 					
 					session.setAttribute("Member_Email" , sessionEmail);
 					session.setAttribute("Member_Number" , sessionNumber);
@@ -244,7 +376,7 @@ public class MemberContoller extends HttpServlet {
 					session.setAttribute("Member_Anni" , sessionAnni);
 					session.setAttribute("Member_Couple" , sessionCouple);
 					session.setAttribute("Member_License" , sessionLicense);
-					
+					session.setAttribute("Member_OrderCount" , sessionorderCount);
 					//boolean flag = true;
 					//request.setAttribute("flag", flag);
 					System.out.println("로그인 완료 검증 email 명 : " + sessionEmail);

@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Optional;
 
 import javax.naming.Context;
@@ -65,6 +66,45 @@ public class MemberRepository { // DAO
 		}
 	}
 	
+    Optional<Member> MemberInfoUser(String email) {
+		Connection con = null;
+		ResultSet rs = null;
+		PreparedStatement pstmt = null;
+		String sql = MemberSQL.MEMBERINFO;
+		
+		try {
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1 , email);
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				Member m = new Member();
+				m.setEmail(rs.getString(1));
+				m.setMemNumber(rs.getInt(2));
+				m.setMemName(rs.getString(3));
+				m.setBirth(rs.getDate(4));
+				m.setPwd(rs.getString(5));
+				m.setGrade(rs.getString(6));
+				m.setNick(rs.getString(7));
+				m.setMemPhone(rs.getString(8));
+				m.setMemLoc(rs.getString(9));
+				m.setGender(rs.getInt(10));
+				m.setAnni(rs.getDate(11));
+				m.setCouple(rs.getInt(12));
+				m.setLicense(rs.getInt(13));
+				m.setOrderCount(rs.getInt(14));
+				return Optional.of(m);
+			}else {
+				return Optional.empty();
+			}	
+		}catch(Exception e){
+			throw new IllegalStateException(e);
+		}finally {
+			close(con,pstmt,rs);
+		}
+			
+	}
+	
     Optional<Member> MemberInfo(String email) {
 		Connection con = null;
 		ResultSet rs = null;
@@ -91,6 +131,7 @@ public class MemberRepository { // DAO
 				m.setAnni(rs.getDate(11));
 				m.setCouple(rs.getInt(12));
 				m.setLicense(rs.getInt(13));
+				m.setOrderCount(rs.getInt(14));
 				return Optional.of(m);
 			}else {
 				return Optional.empty();
@@ -101,6 +142,126 @@ public class MemberRepository { // DAO
 			close(con,pstmt,rs);
 		}
 			
+	} 
+    ArrayList<String> XSearch(){
+       	Connection con = null;
+    	PreparedStatement pstmt = null;
+    	ResultSet rs = null;
+    	String sql = MemberSQL.XSEARCH;
+    	ArrayList<String> list = new ArrayList<String>();
+    	try {
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				String word = rs.getString(1);
+				list.add(word);
+			}return list;
+    	} catch (Exception e) {
+    		throw new IllegalStateException(e);
+    	} finally {
+    		close(con , pstmt , rs);
+    	}
+    	
+    }
+   void XUpdateNickName(String email , Integer number) {
+    	Connection con = null;
+		PreparedStatement pstmt = null;
+    	String sql = MemberSQL.MEMBERXUPDATE;
+    	String changeNickNames = "defaultUser" + number;
+    	System.out.println("금칙어 "+ email);
+    	try {
+    		con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, changeNickNames);
+			pstmt.setString(2, email);
+			pstmt.executeUpdate();
+    	}catch(Exception e) {
+    		throw new IllegalStateException(e);
+    	}finally {
+    		close(con, pstmt , null);
+    	}
+    }
+   
+    HashMap<String , String> updateMemberNickNameXSelect() {
+    	Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = MemberSQL.MEMBERFINDNICKX;
+		HashMap<String,String> hm = new HashMap<String , String>();
+		ArrayList<String> list = XSearch();
+		try {
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			for(int i =0;i<list.size();i++) {
+				String checked = list.get(i);
+				pstmt.setString(1, checked);
+				rs = pstmt.executeQuery();
+					while(rs.next()) {
+						String changeEmail = rs.getString("email");
+						String changeNick = rs.getString("nick");
+						System.out.println("emailKeyed " +  changeNick + " : " + checked);
+							if(changeNick.equals(checked)) {
+								checked = "%" + checked + "%";
+								hm.put(changeEmail, changeNick);
+							}		
+				}
+			}return hm;
+		}catch(Exception e) {
+			throw new IllegalStateException(e);
+		}finally {
+			close(con , pstmt , rs);
+		}
+    }
+    
+	boolean updateMemberAdmin(String email , String categoryChoicePwd , String categoryChoiceNick , Integer categoryChoicePhone  , Integer categoryChoiceLisence , String loc) {
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		String sql = MemberSQL.UPDATEMEMBERADMIN;
+		try {
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, categoryChoiceNick);
+			pstmt.setInt(2, categoryChoicePhone);
+			pstmt.setString(3, categoryChoicePwd);
+			pstmt.setInt(4, categoryChoiceLisence);
+			pstmt.setString(5, loc);
+			pstmt.setString(6 , email);
+			int i = pstmt.executeUpdate();
+			if( i > 0 ) {
+				return true;
+			} else {
+				return false;
+			}
+			
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		} finally {
+			close( con , pstmt, null); 
+		}
+	}
+    
+    
+	boolean updateMemberUser(String email , String content , String sql) {
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		try {
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, content);
+			pstmt.setString(2 , email);
+			int i = pstmt.executeUpdate();
+			if( i > 0 ) {
+				return true;
+			} else {
+				return false;
+			}
+			
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		} finally {
+			close( con , pstmt, null); 
+		}
 	}
 	
     boolean updateMember(String email ,String content , String sql) {
@@ -149,7 +310,8 @@ public class MemberRepository { // DAO
 				Date anni = rs.getDate("anni");
 				int couple = rs.getInt("couple");
 				int license = rs.getInt("license");
-				list.add(new Member(email, number, name, birth, pwd, gradeDefaultValue, nick, phone, loc, gender, anni, couple, license));		
+				int orderCount = rs.getInt("orderCount");
+				list.add(new Member(email, number, name, birth, pwd, gradeDefaultValue, nick, phone, loc, gender, anni, couple, license, orderCount));		
 			}
 			return list;
 		}catch(Exception e) {
@@ -186,8 +348,9 @@ public class MemberRepository { // DAO
 				Date anni = rs.getDate("anni");
 				int couple = rs.getInt("couple");
 				int license = rs.getInt("license");
+				int orderCount = rs.getInt("orderCount");
 				if(pwds.equals(pwdCheck)) {
-					list.add(new Member(email, number, name, birth, pwd, gradeDefaultValue, nick, phone, loc, gender, anni, couple, license));
+					list.add(new Member(email, number, name, birth, pwd, gradeDefaultValue, nick, phone, loc, gender, anni, couple, license, orderCount));
 					return list;
 				} else {
 					return null;
@@ -295,8 +458,9 @@ public class MemberRepository { // DAO
 				Date anni = rs.getDate(11);
 				int couple = rs.getInt(12);
 				int license = rs.getInt(13);
+				int orderCount = rs.getInt("orderCount");
 				System.out.println("rs 내" + email);
-				list.add(new Member(email, number, name, birth, pwd, grade, nick, phone, loc, gender, anni, couple, license));
+				list.add(new Member(email, number, name, birth, pwd, grade, nick, phone, loc, gender, anni, couple, license , orderCount));
 			} 
 			return list;
 		}catch(Exception e) {

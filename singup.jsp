@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <title>제주 프렌드</title>
-<title>Insert title here</title>
+
 		<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 			<script>
 				function sample6_execDaumPostcode() {
@@ -86,36 +86,36 @@
 </form>
 </body>
 	<script
-		  src="https://code.jquery.com/jquery-3.5.1.min.js"
-		  integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
-		  crossorigin="anonymous">
+		   src="https://code.jquery.com/jquery-3.5.1.min.js"
+		   integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+		   crossorigin="anonymous">
 	</script>
 	<script>
-		$('#checkEmailbutton').on("click" , (e) => {
-			const email = $('#email').val();
-			e.preventDefault();
-			console.log('btn click');
-			if(email.length == 0 || email == null ) return alert("이메일을 입력하세요.");
-			$.ajax({
-				type:'post',
-				async:true,
-				url:'http://localhost:8080/project/member/mController?message=emailCheck',
-				dataType:'text',
-				data:{email:email},
-				success: function(data, textStatus) {
-					if (data == 1)  {
-						$('#messages').text('사용할 수 있는 이메일입니다.');
-						$('#checkEmailbutton').prop('disabled , true');
-					} else {
-						$('#messages').text('이미 사용 중인 아이디입니다.');
-					}
-				},
-				error:function(data, textStatus){
-					$('#messages').text('error');
+	$('#checkEmailbutton').on("click" , (e) => {
+		const email = $('#email').val();
+		e.preventDefault();
+		console.log('btn click');
+		if(email.length == 0 || email == null ) return alert("이메일을 입력하세요.");
+		$.ajax({
+			type:'post',
+			async:true,
+			url:'http://localhost:8080/project/member/mController?message=emailCheck',
+			dataType:'text',
+			data:{email:email},
+			success: function(data, textStatus) {
+				if (data == 1){
+					$('#messages').text('사용할 수 있는 이메일입니다.');
+					$('#checkEmailbutton').prop('disabled , true');
+				} else {
+					$('#messages').text('이미 사용 중인 아이디입니다.');
 				}
-			
-			})
-		} )
+			},
+			error:function(data, textStatus){
+				$('#messages').text('error');
+			}
+		
+		})
+	} )
 	</script>
 	<script src="js/jquery-3.6.0.min.js"></script>
 	<script type="text/javascript">

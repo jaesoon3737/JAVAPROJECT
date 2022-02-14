@@ -4,12 +4,16 @@ package Member.service;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.Set;
 
 import Member.domain.Member;
 
 public class MemberService {
-	
+	private static int XChangememberCount;
 	private MemberRepository memberRepository;
 	
 	public static MemberService instance = new MemberService();
@@ -68,6 +72,32 @@ public class MemberService {
 		}
 		
 	}
+	public boolean updateMemberAdmin(String email , String categoryChoicePwd , String categoryChoiceNick , Integer categoryChoicePhone , Integer categoryChoiceLisence ,String categoryLoc) {
+		String sql = null;
+		if(email == null || categoryChoicePwd == null || categoryChoicePwd.equals("") || categoryChoiceNick == null ||  categoryChoiceNick.equals("") || categoryChoicePhone.equals("") || categoryChoicePhone == null || categoryLoc == null || categoryLoc.equals("")) {
+			return false;
+		} else {
+		return memberRepository.updateMemberAdmin(email , categoryChoicePwd, categoryChoiceNick  , categoryChoicePhone , categoryChoiceLisence ,  categoryLoc);
+		}
+	}
+	public boolean updateMemberUser(String email , String category , String content) {
+		String sql = null;
+		if(category == null || email == null || content == null || content.equals("") ) {
+			return false;
+		} else  {
+			if(category.equals("nick")) {
+				sql = MemberSQL.UPDATEMEBERUSERNICK;
+			} else if (category.equals("anni")) {
+				sql = MemberSQL.UPDATEMEBERUSERANNI;
+			} else if (category.equals("pwd")) {
+				sql = MemberSQL.UPDATEMEBERUSERPASSWORD;
+			} else if (category.equals("couple")) {
+				sql = MemberSQL.UPDATEMEBERUSERCOUPLE;
+			}
+		}
+		
+		return memberRepository.updateMemberUser(email, category, content);
+	}
 	public ArrayList<Member> MemberFind(Integer columnNumber ,String values){
 		String sql = null;
 		if(columnNumber != null) {
@@ -81,7 +111,35 @@ public class MemberService {
 		}
 		
 		String value = "%" + values + "%";
+		
 		ArrayList<Member> list = memberRepository.MemberFind(value , sql);
 		return list;
+	}
+	private void updateXNickNameExecute(String email , Integer number) {
+		
+		memberRepository.XUpdateNickName(email , number);
+	}
+	public boolean updateMemberNickNameXSelect(){
+		HashMap<String , String > hm  = memberRepository.updateMemberNickNameXSelect();
+		Set<String> keySet = hm.keySet();
+		Iterator<String> emailKey = keySet.iterator();
+		int checkSuccese = -1;
+		
+		while(emailKey.hasNext()) {
+			String emailKeyed = emailKey.next();
+			String changeNickName = hm.get(emailKeyed);
+			if(emailKeyed != null || changeNickName !=null) {
+				
+				updateXNickNameExecute(emailKeyed , XChangememberCount);
+				checkSuccese++;
+				XChangememberCount++;
+			}
+		}
+		if(checkSuccese != -1) {
+			return true;
+		} else {
+			return false;
+		}
+		
 	}
 }

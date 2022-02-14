@@ -17,13 +17,14 @@ public class Member {
 	private Date anni;
 	private int couple;
 	private	int license;
-	
+	private int orderCount;
 	public Member() {
 		super();
 	}
 
+	
 	public Member(String email, long memNumber, String memName, Date birth, String pwd, String grade, String nick,
-			String memPhone, String memLoc, int gender, Date anni, int couple, int license) {
+			String memPhone, String memLoc, int gender, Date anni, int couple, int license, int orderCount) {
 		super();
 		this.email = email;
 		this.memNumber = memNumber;
@@ -38,118 +39,159 @@ public class Member {
 		this.anni = anni;
 		this.couple = couple;
 		this.license = license;
+		this.orderCount = orderCount;
 	}
+	
+	
 
 	public String getEmail() {
 		return email;
 	}
 
+
 	public void setEmail(String email) {
 		this.email = email;
 	}
+
 
 	public long getMemNumber() {
 		return memNumber;
 	}
 
+
 	public void setMemNumber(long memNumber) {
 		this.memNumber = memNumber;
 	}
+
 
 	public String getMemName() {
 		return memName;
 	}
 
+
 	public void setMemName(String memName) {
 		this.memName = memName;
 	}
+
 
 	public Date getBirth() {
 		return birth;
 	}
 
+
 	public void setBirth(Date birth) {
 		this.birth = birth;
 	}
+
 
 	public String getPwd() {
 		return pwd;
 	}
 
+
 	public void setPwd(String pwd) {
 		this.pwd = pwd;
 	}
+
 
 	public String getGrade() {
 		return grade;
 	}
 
+
 	public void setGrade(String grade) {
 		this.grade = grade;
 	}
+
 
 	public String getNick() {
 		return nick;
 	}
 
+
 	public void setNick(String nick) {
 		this.nick = nick;
 	}
+
 
 	public String getMemPhone() {
 		return memPhone;
 	}
 
+
 	public void setMemPhone(String memPhone) {
 		this.memPhone = memPhone;
 	}
+
 
 	public String getMemLoc() {
 		return memLoc;
 	}
 
+
 	public void setMemLoc(String memLoc) {
 		this.memLoc = memLoc;
 	}
+
 
 	public int getGender() {
 		return gender;
 	}
 
+
 	public void setGender(int gender) {
 		this.gender = gender;
 	}
+
 
 	public Date getAnni() {
 		return anni;
 	}
 
+
 	public void setAnni(Date anni) {
 		this.anni = anni;
 	}
+
 
 	public int getCouple() {
 		return couple;
 	}
 
+
 	public void setCouple(int couple) {
 		this.couple = couple;
 	}
+
 
 	public int getLicense() {
 		return license;
 	}
 
+
 	public void setLicense(int license) {
 		this.license = license;
 	}
-	
+
+
+	public int getOrderCount() {
+		return orderCount;
+	}
+
+
+	public void setOrderCount(int orderCount) {
+		this.orderCount = orderCount;
+	}
+
+
 	public String toString() {
 		
 		return "Member{" +
 				"email = " + email +
 				"memNumber = " + memNumber +
-				"memNAme = " + memName + "}";
+				"memNAme = " + memName + 
+				"orederCount = " + orderCount + 
+				"}";
 	}
 
 }

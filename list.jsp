@@ -18,13 +18,13 @@
 <p><%=session.getAttribute("Member_Grade") %>등급으로 로그인 중</p>
 
 <c:choose>
-	<c:when test="${Member_Grade == '관리자'}">
-		<span><a href="#" class="basicLogin_item">마이페이지</a> </span>
+	<c:when test="${Member_Grade == 'admin'}">
+		<span><a href="../member/mController?message=myPage" class="basicLogin_item">마이페이지</a> </span>
 		<span><a href="../member/mController?message=memberManagement" class="basicLogin_item">회원관리</a> </span>
 		<span><a href='../member/mController?message=logout' class="basicLogin_item">로그아웃</a> </span>
 	</c:when>
 	<c:when test="${ not empty Member_Email}">
-		<span><a href="#" class="basicLogin_item">마이페이지</a> </span>
+		<span><a href="../member/mController?message=myPage" class="basicLogin_item">마이페이지</a> </span>
 		<span><a href='../member/mController?message=logout' class="basicLogin_item">로그아웃</a> </span>
 	</c:when>
 	<c:otherwise>
